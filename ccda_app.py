@@ -7,7 +7,6 @@ from webdriver_manager.core.os_manager import ChromeType
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
 import pandas as pd
 import os
 
@@ -22,6 +21,7 @@ def get_driver():
         service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()),
         options=options,
     )
+
 # Archivo CSV donde se guardarán las respuestas
 csv_file = "revisiones.csv"
 
@@ -71,21 +71,21 @@ if url:
             st.error(f"Hubo un error al intentar hacer web scraping: {e}")
 
         finally:
-            # Guardar los resultados en el CSV
-             df = pd.read_csv(csv_file)
-             new_data = {
-                 "ID": len(df) + 1,
-                 "URL": url,
-                 "Título": page_title,
-                 "Contenido": post_content,
-                 "Correcto": is_correct,
-            }
-            df = df.append(new_data, ignore_index=True)
-            df.to_csv(csv_file, index=False)
-            
             # Cerrar el navegador
             if "driver" in locals():
                 driver.quit()
+        
+        # Guardar los resultados en el CSV
+        df = pd.read_csv(csv_file)
+        new_data = {
+            "ID": len(df) + 1,
+            "URL": url,
+            "Título": page_title,
+            "Contenido": post_content,
+            "Correcto": is_correct,
+        }
+        df = df.append(new_data, ignore_index=True)
+        df.to_csv(csv_file, index=False)
 
 # Mostrar revisiones existentes
 st.subheader("Revisiones Guardadas")
