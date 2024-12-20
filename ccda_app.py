@@ -4,6 +4,9 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.os_manager import ChromeType
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 def get_driver():
     options = Options()
@@ -29,11 +32,13 @@ if url:
 
             # Extraer el título
             page_title = driver.title
-           
-           # Extraer el contenido del posteo
+
+            # Extraer el contenido del posteo
             try:
-                # Usamos XPath para localizar el elemento <h1> con las clases correspondientes
-                post_content = driver.find_element("xpath", "//div[contains(@class, '_a9zs')]").text
+                # Usar WebDriverWait para esperar el contenido
+                post_content = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, "//div[contains(@class, '_a9zs')]"))
+                ).text
             except Exception:
                 post_content = "No se pudo extraer el contenido del posteo."
 
