@@ -33,7 +33,7 @@ if url:
            # Extraer el contenido del posteo
             try:
                 # Usamos XPath para localizar el elemento <h1> con las clases correspondientes
-                post_content = driver.find_element("xpath", "//h1[contains(@class, '_ap3a _aaco _aacu _aacx _aad7 _aade')]").text
+                post_content = driver.find_element("xpath", "//div[contains(@class, '_a9zs')]").text
             except Exception:
                 post_content = "No se pudo extraer el contenido del posteo."
 
