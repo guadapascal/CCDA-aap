@@ -22,8 +22,14 @@ if url:
             options.add_argument('--no-sandbox')
             options.add_argument('--disable-dev-shm-usage')
 
-            # Iniciar Selenium con WebDriver Manager
-            driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+            # Configurar ChromeDriver
+            try:
+                driver = webdriver.Chrome(
+                    service=Service(ChromeDriverManager().install()), 
+                    options=options
+            )
+            except Exception as e:
+                st.error(f"Error al iniciar Selenium: {e}")
             
             # Abrir la URL
             driver.get(url)
