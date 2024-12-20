@@ -1,44 +1,36 @@
 import streamlit as st
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
 
-# Título de la app
-st.title("Validación de Contenidos de Redes Sociales")
+"""
+## Web scraping on Streamlit Cloud with Selenium
 
-# Ingreso de URL
-url = st.text_input("Ingresa la URL del posteo de la red social:")
+[![Source](https://img.shields.io/badge/View-Source-<COLOR>.svg)](https://github.com/snehankekre/streamlit-selenium-chrome/)
 
-if url:
-    if st.button("Procesar URL"):
-        try:
-            # Configuración de Selenium con Chromium
-            options = Options()
-            options.add_argument('--headless')  # Modo sin interfaz gráfica
-            options.add_argument('--no-sandbox')
-            options.add_argument('--disable-dev-shm-usage')
+This is a minimal, reproducible example of how to scrape the web with Selenium and Chrome on Streamlit's Community Cloud.
 
-            # Especificar la ruta del navegador Chromium
-            options.binary_location = '/usr/bin/google-chrome'
+Fork this repo, and edit `/streamlit_app.py` to customize this app to your heart's desire. :heart:
+"""
 
-             # Inicializar ChromeDriver
-            driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-            driver.get(url)
+with st.echo():
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    from selenium.webdriver.chrome.service import Service
+    from webdriver_manager.chrome import ChromeDriverManager
+    from webdriver_manager.core.os_manager import ChromeType
 
-            # Extraer contenido
-            paragraphs = driver.find_elements(By.TAG_NAME, "p")
-            page_content = " ".join([p.text for p in paragraphs if p.text.strip()])
-            page_title = driver.title
+    @st.cache_resource
+    def get_driver():
+        return webdriver.Chrome(
+            service=Service(
+                ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
+            ),
+            options=options,
+        )
 
-            # Cerrar el navegador
-            driver.quit()
+    options = Options()
+    options.add_argument("--disable-gpu")
+    options.add_argument("--headless")
 
-            # Mostrar resultados
-            st.subheader("Resultado del Web Scraping")
-            st.write(f"**Título de la Página:** {page_title}")
-            st.text_area("Contenido Extraído:", page_content, height=300)
+    driver = get_driver()
+    driver.get("http://example.com")
 
-        except Exception as e:
-            st.error(f"Hubo un error al intentar hacer web scraping: {e}")
+    st.code(driver.page_source)
