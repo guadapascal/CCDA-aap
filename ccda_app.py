@@ -3,6 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
 
 # Título de la app
 st.title("Validación de Contenidos de Redes Sociales")
@@ -20,12 +21,10 @@ if url:
             options.add_argument('--disable-dev-shm-usage')
 
             # Especificar la ruta del navegador Chromium
-            options.binary_location = '/usr/bin/chromium-browser'
+            options.binary_location = '/usr/bin/google-chrome'
 
-            # Inicializar el controlador Chrome con Selenium
-            driver = webdriver.Chrome(service=Service('/usr/bin/chromedriver'), options=options)
-
-            # Abrir la URL
+             # Inicializar ChromeDriver
+            driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
             driver.get(url)
 
             # Extraer contenido
