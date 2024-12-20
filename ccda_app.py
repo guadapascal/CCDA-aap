@@ -5,8 +5,6 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.os_manager import ChromeType
 
-# Función para inicializar el navegador Selenium
-@st.cache_resource
 def get_driver():
     options = Options()
     options.add_argument("--disable-gpu")
@@ -18,29 +16,27 @@ def get_driver():
         options=options,
     )
 
-# Título de la app
 st.title("Validación de Contenidos de Redes Sociales")
 
-# Entrada de URL por el usuario
 url = st.text_input("Ingresa la URL del posteo de la red social:")
 
 if url:
     if st.button("Procesar URL"):
         try:
-            # Inicializar el navegador y cargar la URL
             driver = get_driver()
+            driver.set_page_load_timeout(30)  # Incrementar tiempo de espera
             driver.get(url)
 
-            # Extraer título y contenido
-            page_title = driver.title  # Título de la página
-            page_content = driver.find_element("tag name", "body").text  # Contenido del cuerpo
+            # Extraer contenido
+            page_title = driver.title
+            page_content = driver.find_element("tag name", "body").text
 
-            # Mostrar los resultados
+            # Mostrar resultados
             st.subheader("Resultado del Web Scraping")
             st.write(f"**Título de la Página:** {page_title}")
             st.text_area("Contenido Extraído:", page_content[:1000], height=300)
 
-            # Preguntar al usuario si el scraping es correcto
+            # Pregunta al usuario
             is_correct = st.radio("¿El contenido extraído es correcto?", ("Sí", "No"), index=0)
             if st.button("Confirmar Validación"):
                 if is_correct == "Sí":
@@ -48,9 +44,10 @@ if url:
                 else:
                     st.warning("Por favor, verifica la URL o el contenido extraído.")
 
-             # Cerrar el navegador siempre
-            if "driver" in locals():
-            driver.quit()
-
         except Exception as e:
             st.error(f"Hubo un error al intentar hacer web scraping: {e}")
+
+        finally:
+            # Cerrar el navegador
+            if "driver" in locals():
+                driver.quit()
