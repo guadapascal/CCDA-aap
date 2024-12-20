@@ -8,6 +8,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+import pandas as pd
+import os
+
+# Función para inicializar el driver de Selenium
 def get_driver():
     options = Options()
     options.add_argument("--disable-gpu")
@@ -18,7 +22,15 @@ def get_driver():
         service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()),
         options=options,
     )
+# Archivo CSV donde se guardarán las respuestas
+csv_file = "revisiones.csv"
 
+# Crear el archivo CSV si no existe
+if not os.path.exists(csv_file):
+    df = pd.DataFrame(columns=["ID", "URL", "Título", "Contenido", "Correcto"])
+    df.to_csv(csv_file, index=False)
+
+# Entorno de la app
 st.title("Validación de Contenidos de Redes Sociales")
 
 url = st.text_input("Ingresa la URL del posteo de la red social:")
@@ -50,11 +62,20 @@ if url:
             # Pregunta al usuario
             is_correct = st.radio("¿El contenido extraído es correcto?", ("Sí", "No"), index=0)
             if st.button("Confirmar Validación"):
-                if is_correct == "Sí":
-                    st.success("¡Gracias! El contenido ha sido validado correctamente.")
-                else:
-                    st.warning("Por favor, verifica la URL o el contenido extraído.")
-
+                # Guardar los resultados en el CSV
+                df = pd.read_csv(csv_file)
+                new_data = {
+                    "ID": len(df) + 1,
+                    "URL": url,
+                    "Título": page_title,
+                    "Contenido": post_content,
+                    "Correcto": is_correct,
+                }
+                df = df.append(new_data, ignore_index=True)
+                df.to_csv(csv_file, index=False)
+                
+                st.success("¡Gracias! El contenido ha sido validado correctamente.")
+              
         except Exception as e:
             st.error(f"Hubo un error al intentar hacer web scraping: {e}")
 
@@ -62,3 +83,11 @@ if url:
             # Cerrar el navegador
             if "driver" in locals():
                 driver.quit()
+
+# Mostrar revisiones existentes
+st.subheader("Revisiones Guardadas")
+if os.path.exists(csv_file):
+    df = pd.read_csv(csv_file)
+    st.dataframe(df)
+else:
+    st.write("No hay revisiones guardadas todavía.")
