@@ -2,7 +2,7 @@ import streamlit as st
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
 
 # Título de la app
 st.title("Validación de Contenidos de Redes Sociales")
@@ -13,20 +13,23 @@ url = st.text_input("Ingresa la URL del posteo de la red social:")
 if url:
     if st.button("Procesar URL"):
         try:
-            # Configuración de Selenium
+            # Configuración de Selenium con Chromium
             options = Options()
-            options.add_argument('--headless')  # Ejecutar en modo sin interfaz gráfica
+            options.add_argument('--headless')  # Modo sin interfaz gráfica
             options.add_argument('--no-sandbox')
             options.add_argument('--disable-dev-shm-usage')
 
-            # Inicializar Selenium con WebDriver Manager
-            driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-            
+            # Especificar la ruta del navegador Chromium
+            options.binary_location = '/usr/bin/chromium-browser'
+
+            # Inicializar el controlador Chrome con Selenium
+            driver = webdriver.Chrome(service=Service('/usr/bin/chromedriver'), options=options)
+
             # Abrir la URL
             driver.get(url)
 
             # Extraer contenido
-            paragraphs = driver.find_elements_by_tag_name("p")
+            paragraphs = driver.find_elements(By.TAG_NAME, "p")
             page_content = " ".join([p.text for p in paragraphs if p.text.strip()])
             page_title = driver.title
 
