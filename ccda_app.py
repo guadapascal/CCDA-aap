@@ -3,7 +3,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
-import undetected_chromedriver.v2 as uc
 
 # Título de la app
 st.title("Validación de Contenidos de Redes Sociales")
@@ -14,15 +13,15 @@ url = st.text_input("Ingresa la URL del posteo de la red social:")
 if url:
     if st.button("Procesar URL"):
         try:
-            # Configuración de undetected-chromedriver
-            options = uc.ChromeOptions()
+            # Configuración de Selenium
+            options = Options()
             options.add_argument('--headless')  # Ejecutar en modo sin interfaz gráfica
             options.add_argument('--no-sandbox')
             options.add_argument('--disable-dev-shm-usage')
 
-            # Inicializar el navegador con undetected-chromedriver
-            driver = uc.Chrome(options=options)
-
+            # Inicializar Selenium con WebDriver Manager
+            driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+            
             # Abrir la URL
             driver.get(url)
 
