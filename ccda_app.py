@@ -1,36 +1,55 @@
 import streamlit as st
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.os_manager import ChromeType
 
-"""
-## Web scraping on Streamlit Cloud with Selenium
-
-[![Source](https://img.shields.io/badge/View-Source-<COLOR>.svg)](https://github.com/snehankekre/streamlit-selenium-chrome/)
-
-This is a minimal, reproducible example of how to scrape the web with Selenium and Chrome on Streamlit's Community Cloud.
-
-Fork this repo, and edit `/streamlit_app.py` to customize this app to your heart's desire. :heart:
-"""
-
-with st.echo():
-    from selenium import webdriver
-    from selenium.webdriver.chrome.options import Options
-    from selenium.webdriver.chrome.service import Service
-    from webdriver_manager.chrome import ChromeDriverManager
-    from webdriver_manager.core.os_manager import ChromeType
-
-    @st.cache_resource
-    def get_driver():
-        return webdriver.Chrome(
-            service=Service(
-                ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
-            ),
-            options=options,
-        )
-
+# Función para inicializar el navegador Selenium
+@st.cache_resource
+def get_driver():
     options = Options()
     options.add_argument("--disable-gpu")
-    options.add_argument("--headless")
+    options.add_argument("--headless")  # Ejecutar sin interfaz gráfica
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    return webdriver.Chrome(
+        service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()),
+        options=options,
+    )
 
-    driver = get_driver()
-    driver.get("https://www.instagram.com/p/CpiPvfjoCQL/")
+# Título de la app
+st.title("Validación de Contenidos de Redes Sociales")
 
-    st.code(driver.page_source)
+# Entrada de URL por el usuario
+url = st.text_input("Ingresa la URL del posteo de la red social:")
+
+if url:
+    if st.button("Procesar URL"):
+        try:
+            # Inicializar el navegador y cargar la URL
+            driver = get_driver()
+            driver.get(url)
+
+            # Extraer título y contenido
+            page_title = driver.title  # Título de la página
+            page_content = driver.find_element("tag name", "body").text  # Contenido del cuerpo
+
+            # Mostrar los resultados
+            st.subheader("Resultado del Web Scraping")
+            st.write(f"**Título de la Página:** {page_title}")
+            st.text_area("Contenido Extraído:", page_content[:1000], height=300)
+
+            # Preguntar al usuario si el scraping es correcto
+            is_correct = st.radio("¿El contenido extraído es correcto?", ("Sí", "No"), index=0)
+            if st.button("Confirmar Validación"):
+                if is_correct == "Sí":
+                    st.success("¡Gracias! El contenido ha sido validado correctamente.")
+                else:
+                    st.warning("Por favor, verifica la URL o el contenido extraído.")
+
+            # Cerrar el navegador
+            driver.quit()
+
+        except Exception as e:
+            st.error(f"Hubo un error al intentar hacer web scraping: {e}")
