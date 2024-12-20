@@ -32,7 +32,7 @@ if url:
            
            # Extraer el contenido del posteo
             try:
-                post_content = driver.find_element("xpath", "//div[contains(@class, '_a9zr')]/span").text 
+                post_content = driver.find_element("xpath", "//div[contains(@class, '_a9zr')]").text 
             except Exception:
                 post_content = "No se pudo extraer el contenido del posteo."
 
