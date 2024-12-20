@@ -62,24 +62,27 @@ if url:
             # Pregunta al usuario
             is_correct = st.radio("¿El contenido extraído es correcto?", ("Sí", "No"), index=0)
             if st.button("Confirmar Validación"):
-                # Guardar los resultados en el CSV
-                df = pd.read_csv(csv_file)
-                new_data = {
-                    "ID": len(df) + 1,
-                    "URL": url,
-                    "Título": page_title,
-                    "Contenido": post_content,
-                    "Correcto": is_correct,
-                }
-                df = df.append(new_data, ignore_index=True)
-                df.to_csv(csv_file, index=False)
-                
-                st.success("¡Gracias! El contenido ha sido validado correctamente.")
+                if is_correct == "Sí":
+                    st.success("¡Gracias! El contenido ha sido validado correctamente.")
+                else:
+                    st.warning("Lamentablemente la app no logra recuperar automáticamente el contenido, lo revisaremos manualmente.")   
               
         except Exception as e:
             st.error(f"Hubo un error al intentar hacer web scraping: {e}")
 
         finally:
+            # Guardar los resultados en el CSV
+             df = pd.read_csv(csv_file)
+             new_data = {
+                 "ID": len(df) + 1,
+                 "URL": url,
+                 "Título": page_title,
+                 "Contenido": post_content,
+                 "Correcto": is_correct,
+            }
+            df = df.append(new_data, ignore_index=True)
+            df.to_csv(csv_file, index=False)
+            
             # Cerrar el navegador
             if "driver" in locals():
                 driver.quit()
