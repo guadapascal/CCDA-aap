@@ -48,7 +48,8 @@ if url:
                 else:
                     st.warning("Por favor, verifica la URL o el contenido extraído.")
 
-            # Cerrar el navegador
+             # Cerrar el navegador siempre
+            if "driver" in locals():
             driver.quit()
 
         except Exception as e:
