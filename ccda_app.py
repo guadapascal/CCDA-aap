@@ -77,14 +77,14 @@ if url:
         
         # Guardar los resultados en el CSV
         df = pd.read_csv(csv_file)
-        new_data = {
+        new_data = pd.DataFrame([{
             "ID": len(df) + 1,
             "URL": url,
             "Título": page_title,
             "Contenido": post_content,
             "Correcto": is_correct,
-        }
-        df = df.append(new_data, ignore_index=True)
+        }])
+        df = pd.concat([df, new_data], ignore_index=True)
         df.to_csv(csv_file, index=False)
 
 # Mostrar revisiones existentes
