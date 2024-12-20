@@ -27,14 +27,19 @@ if url:
             driver.set_page_load_timeout(30)  # Incrementar tiempo de espera
             driver.get(url)
 
-            # Extraer contenido
+            # Extraer el título
             page_title = driver.title
-            page_content = driver.find_element("tag name", "body").text
+           
+           # Extraer el contenido del posteo
+            try:
+                post_content = driver.find_element("xpath", "//div[contains(@class, 'C4VMK')]/span").text
+            except Exception:
+                post_content = "No se pudo extraer el contenido del posteo."
 
-            # Mostrar resultados
+           # Mostrar resultados
             st.subheader("Resultado del Web Scraping")
             st.write(f"**Título de la Página:** {page_title}")
-            st.text_area("Contenido Extraído:", page_content[:1000], height=300)
+            st.text_area("Contenido del Posteo:", post_content, height=300)
 
             # Pregunta al usuario
             is_correct = st.radio("¿El contenido extraído es correcto?", ("Sí", "No"), index=0)
