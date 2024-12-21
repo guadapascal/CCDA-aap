@@ -29,15 +29,16 @@ def append_to_sheet(data):
         body = {'values': data}
         result = sheet.values().append(
             spreadsheetId=SPREADSHEET_ID,
-            range="Hoja1!A1",  # Ajusta el rango según tus necesidades
+            range="Hoja1!A1",
             valueInputOption="RAW",
             insertDataOption="INSERT_ROWS",
             body=body
         ).execute()
+        st.write("Datos guardados exitosamente en Google Sheets.")  # Mensaje de debug
         return result
     except Exception as e:
         st.error(f"No se pudo actualizar Google Sheets: {e}")
-
+        print(e)  # Mensaje de debug
 
 # Función para inicializar el driver de Selenium
 def get_driver():
@@ -83,6 +84,7 @@ if url:
             # Pregunta al usuario
             is_correct = st.radio("¿El contenido extraído es correcto?", ("Sí", "No"), index=0)
             if st.button("Confirmar Validación"):
+                st.write("Botón presionado.")  # Mensaje temporal para debug
                 if is_correct == "Sí":
                     st.success("¡Gracias! El contenido ha sido validado correctamente.")
                 else:
