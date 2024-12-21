@@ -52,48 +52,35 @@ def get_driver():
         options=options,
     )
 
+# Verificar si `session_state` tiene las claves necesarias
+if "page_title" not in st.session_state:
+    st.session_state["page_title"] = ""
+if "post_content" not in st.session_state:
+    st.session_state["post_content"] = ""
+
 # Diseño de la app
 st.title("Validación de Contenidos de Redes Sociales")
 
 url = st.text_input("Ingresa la URL del posteo de la red social:")
 
-if url:
-    if st.button("Procesar URL"):
+if url and st.button("Procesar URL"):
         try:
             driver = get_driver()
             driver.set_page_load_timeout(30)  # Incrementar tiempo de espera
             driver.get(url)
 
             # Extraer el título
-            page_title = driver.title
+            st.session_state["page_title"] = driver.title
 
             # Extraer el contenido del posteo
             try:
                 # Usar WebDriverWait para esperar el contenido
-                post_content = WebDriverWait(driver, 10).until(
+                st.session_state["post_content"] = WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.XPATH, "//div[contains(@class, '_a9zs')]"))
                 ).text
             except Exception:
-                post_content = "No se pudo extraer el contenido del posteo."
+                st.session_state["post_content"] = "No se pudo extraer el contenido del posteo."
 
-            # Mostrar resultados
-            st.subheader("Resultado del Web Scraping")
-            st.write(f"**Título de la Página:** {page_title}")
-            st.text_area("Contenido del Posteo:", post_content, height=300)
-
-            # Pregunta al usuario
-            is_correct = st.radio("¿El contenido extraído es correcto?", ("Sí", "No"), index=0)
-            if st.button("Confirmar Validación"):
-                st.write("Botón presionado.")  # Mensaje temporal para debug
-                if is_correct == "Sí":
-                    st.success("¡Gracias! El contenido ha sido validado correctamente.")
-                else:
-                    st.warning("Lamentablemente la app no logra recuperar automáticamente el contenido, revisaremos la URL manualmente.")   
-
-                # Guardar los resultados en Google Sheets
-                new_data = [[url, page_title, post_content, is_correct]]
-                append_to_sheet(new_data)
-        
         except Exception as e:
             st.error(f"Hubo un error al intentar hacer web scraping: {e}")
 
@@ -101,4 +88,24 @@ if url:
             # Cerrar el navegador
             if "driver" in locals():
                 driver.quit()
+
+# Mostrar resultados si ya están almacenados
+if st.session_state["page_title"] and st.session_state["post_content"]:
+    st.subheader("Resultado del Web Scraping")
+    st.write(f"**Título de la Página:** {st.session_state['page_title']}")
+    st.text_area("Contenido del Posteo:", st.session_state["post_content"], height=300)
+
+    # Pregunta al usuario
+    is_correct = st.radio("¿El contenido extraído es correcto?", ("Sí", "No"), index=0)
+    if st.button("Confirmar Validación"):
+        if is_correct == "Sí":
+            st.success("¡Gracias! El contenido ha sido validado correctamente.")
+        else:
+            st.warning("Lamentablemente la app no logra recuperar automáticamente el contenido, lo revisaremos manualmente.")
+
+        # Guardar los resultados en Google Sheets
+        new_data = [[url, st.session_state["page_title"], st.session_state["post_content"], is_correct]]
+        append_to_sheet(new_data)
+        
+        
 
