@@ -9,6 +9,35 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 import os
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+
+# Configurar la autenticación de Google Sheets utilizando secrets
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+credentials = service_account.Credentials.from_service_account_info(
+    st.secrets["google_drive"], scopes=SCOPES
+)
+sheet_service = build('sheets', 'v4', credentials=credentials)
+
+# ID de la hoja de cálculo
+SPREADSHEET_ID = 'ccda-app'
+
+# Función para agregar datos a Google Sheets
+def append_to_sheet(data):
+    try:
+        sheet = sheet_service.spreadsheets()
+        body = {'values': data}
+        result = sheet.values().append(
+            spreadsheetId=SPREADSHEET_ID,
+            range="Hoja1!A1",  # Ajusta el rango según tus necesidades
+            valueInputOption="RAW",
+            insertDataOption="INSERT_ROWS",
+            body=body
+        ).execute()
+        return result
+    except Exception as e:
+        st.error(f"No se pudo actualizar Google Sheets: {e}")
+
 
 # Función para inicializar el driver de Selenium
 def get_driver():
@@ -22,15 +51,7 @@ def get_driver():
         options=options,
     )
 
-# Archivo CSV donde se guardarán las respuestas
-csv_file = "revisiones.csv"
-
-# Crear el archivo CSV si no existe
-if not os.path.exists(csv_file):
-    df = pd.DataFrame(columns=["ID", "URL", "Título", "Contenido", "Correcto"])
-    df.to_csv(csv_file, index=False)
-
-# Entorno de la app
+# Diseño de la app
 st.title("Validación de Contenidos de Redes Sociales")
 
 url = st.text_input("Ingresa la URL del posteo de la red social:")
@@ -65,8 +86,12 @@ if url:
                 if is_correct == "Sí":
                     st.success("¡Gracias! El contenido ha sido validado correctamente.")
                 else:
-                    st.warning("Lamentablemente la app no logra recuperar automáticamente el contenido, lo revisaremos manualmente.")   
-              
+                    st.warning("Lamentablemente la app no logra recuperar automáticamente el contenido, revisaremos la URL manualmente.")   
+
+                # Guardar los resultados en Google Sheets
+                new_data = [[url, page_title, post_content, is_correct]]
+                append_to_sheet(new_data)
+        
         except Exception as e:
             st.error(f"Hubo un error al intentar hacer web scraping: {e}")
 
@@ -74,23 +99,4 @@ if url:
             # Cerrar el navegador
             if "driver" in locals():
                 driver.quit()
-        
-        # Guardar los resultados en el CSV
-        df = pd.read_csv(csv_file)
-        new_data = pd.DataFrame([{
-            "ID": len(df) + 1,
-            "URL": url,
-            "Título": page_title,
-            "Contenido": post_content,
-            "Correcto": is_correct,
-        }])
-        df = pd.concat([df, new_data], ignore_index=True)
-        df.to_csv(csv_file, index=False)
 
-# Mostrar revisiones existentes
-st.subheader("Revisiones Guardadas")
-if os.path.exists(csv_file):
-    df = pd.read_csv(csv_file)
-    st.dataframe(df)
-else:
-    st.write("No hay revisiones guardadas todavía.")
