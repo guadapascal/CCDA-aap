@@ -73,11 +73,19 @@ def evaluar_contribucion(contribucion):
     Devuelve los resultados en formato JSON:
     {{ "Lenguaje Inclusivo": x, "Diversidad": x, "Historia": x, "Estereotipos": x }}
     """
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return eval(response["choices"][0]["message"]["content"])
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "Eres un modelo que evalúa contenido de redes sociales."},
+                {"role": "user", "content": post_content},
+            ],
+            temperature=0.7
+        )
+        return response["choices"][0]["message"]["content"]
+    except Exception as e:
+        st.error(f"Error al interactuar con la API de OpenAI: {e}")
+        return None
 
 # Verificar si `session_state` tiene las claves necesarias
 if "page_title" not in st.session_state:
