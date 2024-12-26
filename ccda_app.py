@@ -12,15 +12,14 @@ import os
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
-# Configurar la autenticación de Google Sheets utilizando secrets
+# Configurar Google Sheets y OpenAI
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 credentials = service_account.Credentials.from_service_account_info(
     st.secrets["google_drive"], scopes=SCOPES
 )
 sheet_service = build('sheets', 'v4', credentials=credentials)
-
-# ID de la hoja de cálculo
 SPREADSHEET_ID = '1NtXDHphN_SC6fmAb2Ni6tYJGb7CiRgGuYqMJbclwAr0'
+openai.api_key = st.secrets["openai_api_key"]
 
 # Función para agregar datos a Google Sheets
 def append_to_sheet(data):
@@ -52,13 +51,36 @@ def get_driver():
         options=options,
     )
 
+# Función para evaluar contribución con GPT
+def evaluar_contribucion(contribucion):
+    prompt = f"""
+    Evalúa la siguiente contribución según los criterios del instrumento:
+
+    Texto: {contribucion}
+
+    1. Uso de lenguaje inclusivo (1-4).
+    2. Visibilización de la diversidad (1-4).
+    3. Relevancia histórica y contexto (1-4).
+    4. Ausencia de estereotipos de género (1-4).
+
+    Devuelve los resultados en formato JSON:
+    {{ "Lenguaje Inclusivo": x, "Diversidad": x, "Historia": x, "Estereotipos": x }}
+    """
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return eval(response["choices"][0]["message"]["content"])
+
 # Verificar si `session_state` tiene las claves necesarias
 if "page_title" not in st.session_state:
     st.session_state["page_title"] = ""
 if "post_content" not in st.session_state:
     st.session_state["post_content"] = ""
+    if "evaluacion" not in st.session_state:
+    st.session_state["evaluacion"] = {}
 
-# Diseño de la app
+# Entorno de la app
 st.title("Validación de Contenidos de Redes Sociales")
 
 url = st.text_input("Ingresa la URL del posteo de la red social:")
@@ -89,20 +111,47 @@ if url and st.button("Procesar URL"):
             if "driver" in locals():
                 driver.quit()
 
-# Mostrar resultados si ya están almacenados
-if st.session_state["page_title"] and st.session_state["post_content"]:
+# Mostrar los resultados del scraping si están disponibles
+if st.session_state["page_title"] or st.session_state["post_content"]:
     st.subheader("Resultado del Web Scraping")
     st.write(f"**Título de la Página:** {st.session_state['page_title']}")
     st.text_area("Contenido del Posteo:", st.session_state["post_content"], height=300)
 
-    # Pregunta al usuario
+    # Pregunta al usuario si el contenido es correcto
     is_correct = st.radio("¿El contenido extraído es correcto?", ("Sí", "No"), index=0)
+
     if st.button("Confirmar Validación"):
         if is_correct == "Sí":
             st.success("¡Gracias! El contenido ha sido validado correctamente.")
+
+            # Evaluar con GPT
+            st.session_state["evaluacion"] = evaluar_contribucion(st.session_state["post_content"])
+            st.subheader("Resultados del GPT")
+            st.json(st.session_state["evaluacion"])
+
+            # Preguntar corrección manual
+            st.subheader("Ajustar los Valores")
+            criterios = ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]
+            valores_corregidos = {}
+            for criterio in criterios:
+                valores_corregidos[criterio] = st.slider(
+                    f"Ajustar {criterio}:", 1, 4, st.session_state["evaluacion"][criterio]
+                )
+
+            if st.button("Guardar Evaluación"):
+                # Guardar en Google Sheets
+                new_data = [[
+                    url, st.session_state["page_title"], st.session_state["post_content"],
+                    st.session_state["evaluacion"]["Lenguaje Inclusivo"], st.session_state["evaluacion"]["Diversidad"],
+                    st.session_state["evaluacion"]["Historia"], st.session_state["evaluacion"]["Estereotipos"],
+                    valores_corregidos["Lenguaje Inclusivo"], valores_corregidos["Diversidad"],
+                    valores_corregidos["Historia"], valores_corregidos["Estereotipos"]
+                ]]
+                append_to_sheet(new_data)
+                st.success("La evaluación ha sido guardada correctamente.")
         else:
             st.warning("Lamentablemente la app no logra recuperar automáticamente el contenido, lo revisaremos manualmente.")
-
+        
         # Guardar los resultados en Google Sheets
         new_data = [[url, st.session_state["page_title"], st.session_state["post_content"], is_correct]]
         append_to_sheet(new_data)
