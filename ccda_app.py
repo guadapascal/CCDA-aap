@@ -70,13 +70,11 @@ def limpiar_texto(texto):
 # Función para evaluar una contribución
 def evaluar_contribucion(contribucion):
     prompt = f"""
-    Eres un modelo que evalúa contenido de redes sociales.
-    
-    Evalúa el siguiente texto según los criterios del instrumento:
+    Eres un modelo que evalúa contenido en formato texto de redes sociales según criterios específicos:
 
-    Texto: {contribucion}
+    Este es el texto que debes analizar: {contribucion}
     
-    Criterios del instrumento y su escala de ponderación:  
+    Estos son los criterios y su escala de ponderación que debes seguir:  
     1. Uso de lenguaje inclusivo (1-4).
     2. Visibilización de la diversidad (1-4).
     3. Relevancia histórica y contexto (1-4).
