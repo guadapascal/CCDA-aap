@@ -19,7 +19,12 @@ credentials = service_account.Credentials.from_service_account_info(
 )
 sheet_service = build('sheets', 'v4', credentials=credentials)
 SPREADSHEET_ID = '1NtXDHphN_SC6fmAb2Ni6tYJGb7CiRgGuYqMJbclwAr0'
-openai.api_key = st.secrets["openai_api_key"]
+
+if "openai_api_key" in st.secrets:
+    openai.api_key = st.secrets["openai_api_key"]
+else:
+    st.error("La clave de OpenAI no está configurada en los secretos.")
+st.write(st.secrets)
 
 # Función para agregar datos a Google Sheets
 def append_to_sheet(data):
