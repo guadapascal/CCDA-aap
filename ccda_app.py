@@ -24,7 +24,7 @@ if "openai_api_key" in st.secrets:
     openai.api_key = st.secrets["openai_api_key"]
 else:
     st.error("La clave de OpenAI no está configurada en los secretos.")
-st.write(st.secrets)
+
 
 # Función para agregar datos a Google Sheets
 def append_to_sheet(data):
