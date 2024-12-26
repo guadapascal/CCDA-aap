@@ -9,10 +9,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 import os
+import openai
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
-# Configurar Google Sheets y OpenAI
+# Configurar Google Sheets
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 credentials = service_account.Credentials.from_service_account_info(
     st.secrets["google_drive"], scopes=SCOPES
@@ -20,11 +21,12 @@ credentials = service_account.Credentials.from_service_account_info(
 sheet_service = build('sheets', 'v4', credentials=credentials)
 SPREADSHEET_ID = '1NtXDHphN_SC6fmAb2Ni6tYJGb7CiRgGuYqMJbclwAr0'
 
-if "openai_api_key" in st.secrets:
+# Configurar OpenAI
+try:
     openai.api_key = st.secrets["openai_api_key"]
-else:
-    st.error("La clave de OpenAI no está configurada en los secretos.")
-
+    st.write("Clave configurada correctamente.")
+except Exception as e:
+    st.error(f"Error al configurar la clave: {e}")
 
 # Función para agregar datos a Google Sheets
 def append_to_sheet(data):
