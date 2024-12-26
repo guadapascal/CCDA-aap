@@ -78,7 +78,7 @@ if "page_title" not in st.session_state:
 if "post_content" not in st.session_state:
     st.session_state["post_content"] = ""
     if "evaluacion" not in st.session_state:
-    st.session_state["evaluacion"] = {}
+    st.session_state["evaluacion"] = ""
 
 # Entorno de la app
 st.title("Validación de Contenidos de Redes Sociales")
