@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 import os
 import openai
+import json
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
@@ -57,14 +58,25 @@ def get_driver():
         service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()),
         options=options,
     )
+# Función para limpiar el texto
+def limpiar_texto(texto):
+    try:
+        texto_limpio = json.dumps(texto)
+        return json.loads(texto_limpio)
+    except Exception as e:
+        st.error(f"Error al procesar el contenido del texto: {e}")
+        return ""
 
-# Función para evaluar contribución con GPT
+# Función para evaluar una contribución
 def evaluar_contribucion(contribucion):
     prompt = f"""
-    Evalúa la siguiente contribución según los criterios del instrumento:
+    Eres un modelo que evalúa contenido de redes sociales.
+    
+    Evalúa el siguiente texto según los criterios del instrumento:
 
     Texto: {contribucion}
-
+    
+    Criterios del instrumento y su escala de ponderación:  
     1. Uso de lenguaje inclusivo (1-4).
     2. Visibilización de la diversidad (1-4).
     3. Relevancia histórica y contexto (1-4).
@@ -74,26 +86,33 @@ def evaluar_contribucion(contribucion):
     {{ "Lenguaje Inclusivo": x, "Diversidad": x, "Historia": x, "Estereotipos": x }}
     """
     try:
+        texto_limpio = limpiar_texto(contribucion)
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "Eres un modelo que evalúa contenido de redes sociales."},
-                {"role": "user", "content": post_content},
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": texto_limpio},
             ],
             temperature=0.7
         )
-        return response["choices"][0]["message"]["content"]
+        evaluacion = response["choices"][0]["message"]["content"]
+        st.success("Evaluación automática completada")
+        return evaluacion
     except Exception as e:
         st.error(f"Error al interactuar con la API de OpenAI: {e}")
-        return None
+        return {}
+
 
 # Verificar si `session_state` tiene las claves necesarias
 if "page_title" not in st.session_state:
     st.session_state["page_title"] = ""
+
 if "post_content" not in st.session_state:
     st.session_state["post_content"] = ""
+
 if "evaluacion" not in st.session_state:
     st.session_state["evaluacion"] = ""
+
 
 # Entorno de la app
 st.title("Validación de Contenidos de Redes Sociales")
@@ -139,11 +158,14 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
         if is_correct == "Sí":
             st.success("¡Gracias! El contenido ha sido validado correctamente.")
 
-            # Evaluar con GPT
-            st.session_state["evaluacion"] = evaluar_contribucion(st.session_state["post_content"])
-            st.subheader("Resultados del GPT")
-            st.json(st.session_state["evaluacion"])
-
+            # Verificar post_content y aplicar la evaluacion automática
+            if "post_content" in st.session_state and st.session_state["post_content"]:
+                st.session_state["evaluacion"] = evaluar_contribucion(st.session_state["post_content"])
+                st.subheader("Resultados del GPT")
+                st.json(st.session_state["evaluacion"])
+            else:
+                st.warning("El contenido del post no está disponible. Por favor, revisa el scraping.")
+            
             # Preguntar corrección manual
             st.subheader("Ajustar los Valores")
             criterios = ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]
