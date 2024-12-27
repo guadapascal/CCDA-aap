@@ -190,37 +190,48 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
             st.warning("Lamentablemente la app no logra recuperar automáticamente el contenido, lo revisaremos manualmente.")
 
     # Ajustar los criterios manualmente
-    if "evaluacion" in st.session_state and st.session_state["evaluacion"]:        
+    if st.session_state["evaluacion"]:        
         st.subheader("Entrenando el algoritmo colectivamente")
-        for criterio in st.session_state["valores_corregidos"].keys():
+
+        # Diccionario para almacenar los valores corregidos
+        if "valores_corregidos" not in st.session_state:
+            st.session_state["valores_corregidos"] = {
+                "Lenguaje Inclusivo": st.session_state["evaluacion"]["Lenguaje Inclusivo"],
+                "Diversidad": st.session_state["evaluacion"]["Diversidad"],
+                "Historia": st.session_state["evaluacion"]["Historia"],
+                "Estereotipos": st.session_state["evaluacion"]["Estereotipos"],
+            }
+
+        # Mostrar sliders para cada criterio
+        for criterio in st.session_state["valores_corregidos"]:
             st.session_state["valores_corregidos"][criterio] = st.slider(
                 f"Ajustar {criterio}:",
                 min_value=1,
                 max_value=4,
                 value=st.session_state["valores_corregidos"][criterio],
-                key=criterio,
-            )
+                key=f"slider_{criterio}"
+        )
         
-            # Botón para guardar la evaluación corregida
+            # Botón para guardar la evaluación ajustada
             if st.button("Guardar Evaluación"):
                 # Consolifar datos para guardar en Google Sheets
                 new_data = [[
                     url, 
                     st.session_state["page_title"], 
                     st.session_state["post_content"],
-                    st.session_state["evaluacion"].get("Lenguaje Inclusivo", ""), 
-                    st.session_state["evaluacion"].get("Diversidad", ""),
-                    st.session_state["evaluacion"].get("Historia", ""),
-                    st.session_state["evaluacion"].get("Estereotipos", ""),
-                    st.session_state["valores_corregidos"]["Lenguaje Inclusivo"],
+                    st.session_state["evaluacion"]["Lenguaje Inclusivo"], 
+                    st.session_state["evaluacion"]["Diversidad"],
+                    st.session_state["evaluacion"]["Historia"], 
+                    st.session_state["evaluacion"]["Estereotipos"],
+                    st.session_state["valores_corregidos"]["Lenguaje Inclusivo"], 
                     st.session_state["valores_corregidos"]["Diversidad"],
-                    st.session_state["valores_corregidos"]["Historia"],
+                    st.session_state["valores_corregidos"]["Historia"], 
                     st.session_state["valores_corregidos"]["Estereotipos"]
                 ]]
                 append_to_sheet(new_data)
                 st.success("La evaluación ha sido guardada correctamente.")
-        else:
-            st.warning("Lamentablemente algo falló. Lo revisaremos manualmente.")
+            else:
+                st.warning("Lamentablemente algo falló. Lo revisaremos manualmente.")
         
         # Guardar los resultados en Google Sheets
         new_data = [[url, st.session_state["page_title"], st.session_state["post_content"], is_correct]]
