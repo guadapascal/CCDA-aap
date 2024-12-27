@@ -230,7 +230,7 @@ if st.button("Guardar Evaluación"):
     ]]
     append_to_sheet(new_data)
     st.success("La evaluación ha sido guardada correctamente.")
- else:
+else:
     st.warning("Lamentablemente algo falló. Lo revisaremos manualmente.")
         
         # Guardar los resultados en Google Sheets
