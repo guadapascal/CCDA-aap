@@ -9,7 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 import os
-import openai
+from openai import openai
 import json
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -24,8 +24,11 @@ SPREADSHEET_ID = '1NtXDHphN_SC6fmAb2Ni6tYJGb7CiRgGuYqMJbclwAr0'
 
 # Configurar OpenAI
 try:
-    openai.api_key = st.secrets["openai_api_key"]
-    st.write("Clave configurada correctamente.")
+    #openai.api_key = st.secrets["openai_api_key"]
+    client = OpenAI(
+        api_key=os.environ.get(st.secrets["openai_api_key"]),
+    )
+    st.write("Clave configurada correctamente.")        
 except Exception as e:
     st.error(f"Error al configurar la clave: {e}")
 
