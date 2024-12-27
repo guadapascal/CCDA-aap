@@ -234,8 +234,8 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
                 st.warning("Lamentablemente algo falló. Lo revisaremos manualmente.")
         
         # Guardar los resultados en Google Sheets
-        new_data = [[url, st.session_state["page_title"], st.session_state["post_content"], is_correct]]
-        append_to_sheet(new_data)
+        #new_data = [[url, st.session_state["page_title"], st.session_state["post_content"], is_correct]]
+        #append_to_sheet(new_data)
         
         
 
