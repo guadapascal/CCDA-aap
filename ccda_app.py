@@ -48,7 +48,7 @@ def get_driver():
     )
 
 # Función para generar un ID único
-def generar_id():
+def create_id():
     return str(uuid.uuid4())  
 
 # Función para limpiar el texto
@@ -61,24 +61,6 @@ def limpiar_texto(texto):
         return ""
 
 # Función para agregar datos a Google Sheets
-#def append_to_sheet(data):
-#    try:  
-#        sheet = sheet_service.spreadsheets()
-#        body = {'values': data}
-#       result = sheet.values().append(
-#           spreadsheetId=SPREADSHEET_ID,
-#            range="Hoja1!A1",
-#            valueInputOption="RAW",
-#            insertDataOption="INSERT_ROWS",
-#            body=body
-#        ).execute()
-#        st.write("Datos guardados exitosamente en Google Sheets.")  # Mensaje de debug
-#        return result
-#    except Exception as e:
-#        st.error(f"No se pudo actualizar Google Sheets: {e}")
-#        print(e)  # Mensaje de debug
-
-# Modificar la función `update_or_append_to_sheet` para manejar las diferentes etapas
 def update_sheet(id_contribucion, data, columnas):
     try:
         # Leer todas las filas existentes en la hoja
@@ -176,50 +158,68 @@ if "evaluacion" not in st.session_state:
 
 # Entorno de la app: web scrapping
 st.title("Validación de Contenidos de Redes Sociales")
-
 url = st.text_input("Ingresa la URL del posteo de la red social:")
 
+
+# Botón "Procesar URL"
 if url and st.button("Procesar URL"):
+    try:
+        # Generar un ID único
+        if "id_contribucion" not in st.session_state:
+            st.session_state["id_contribucion"] = create_id()
+
+        # Crear el registro inicial con ID y URL
+        initial_data = [st.session_state["id_contribucion"], url]
+        update_sheet(
+            st.session_state["id_contribucion"], initial_data, ["ID_contribucion", "URL"]
+        )
+
+        # Realizar web scraping
+        driver = get_driver()
+        driver.set_page_load_timeout(30)
+        driver.get(url)
+
+        # Extraer el título
+        st.session_state["page_title"] = driver.title
+
+        # Extraer el contenido del posteo
         try:
-            driver = get_driver()
-            driver.set_page_load_timeout(30)  # Incrementar tiempo de espera
-            driver.get(url)
+            st.session_state["post_content"] = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//div[contains(@class, '_a9zs')]"))
+            ).text
+        except Exception:
+            st.session_state["post_content"] = "No se pudo extraer el contenido del posteo."
+        st.success("Web scraping completado.")
+    except Exception as e:
+        st.error(f"Hubo un error al intentar hacer web scraping: {e}")
+    finally:
+        if "driver" in locals():
+            driver.quit()
 
-            # Extraer el título
-            st.session_state["page_title"] = driver.title
-
-            # Extraer el contenido del posteo
-            try:
-                # Usar WebDriverWait para esperar el contenido
-                st.session_state["post_content"] = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, "//div[contains(@class, '_a9zs')]"))
-                ).text
-            except Exception:
-                st.session_state["post_content"] = "No se pudo extraer el contenido del posteo."
-
-        except Exception as e:
-            st.error(f"Hubo un error al intentar hacer web scraping: {e}")
-
-        finally:
-            # Cerrar el navegador
-            if "driver" in locals():
-                driver.quit()
-
-# Entorno de la app: validación e interacción con el usuario
+# Botón "Confirmar Validación"
 if st.session_state["page_title"] or st.session_state["post_content"]:
     st.subheader("Resultado del Web Scraping")
     st.write(f"**Título de la Página:** {st.session_state['page_title']}")
     st.text_area("Contenido del Posteo:", st.session_state["post_content"], height=300)
 
-    # Verificar si el contenido escaneado es correcto
+    # Preguntar al usuario si el contenido es correcto
     is_correct = st.radio("¿El contenido extraído es correcto?", ("Sí", "No"), index=0)
 
     if st.button("Confirmar Validación"):
+        # Actualizar el registro con datos adicionales
+        validation_data = [
+            st.session_state["id_contribucion"],  # ID único
+            url,  # URL
+            st.session_state["page_title"],  # Título
+            st.session_state["post_content"],  # Contenido
+            is_correct,  # Validación
+        ]
+        update_or_append_to_sheet(
+            st.session_state["id_contribucion"], validation_data,
+            ["ID_contribucion", "URL", "Título", "Contenido", "Validación"]
+        )
         if is_correct == "Sí":
-            st.success("El contenido ha sido validado correctamente. Ahora se está procesando, aguarde unos instantes por favor.")
-            # Guardar los resultados iniciales en Google Sheets
-            new_data = [[url, st.session_state["page_title"], st.session_state["post_content"], is_correct]]
-            append_to_sheet(new_data)
+            st.success("El contenido ha sido validado correctamente.")
             
             # Aplicar la evaluacion automática
             if "post_content" in st.session_state and st.session_state["post_content"]:
@@ -238,7 +238,7 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
                     "Estereotipos": st.session_state["evaluacion"].get("Estereotipos", 1),
                 }     
         else:
-            st.warning("Lamentablemente la app no logra recuperar automáticamente el contenido, lo revisaremos manualmente.")
+            st.warning("Lamentablemente el contenido no es válido, lo revisaremos manualmente.")
 
 # Ajustar los criterios manualmente
 if st.session_state["evaluacion"]:
