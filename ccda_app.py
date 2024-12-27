@@ -121,7 +121,7 @@ if "evaluacion" not in st.session_state:
     st.session_state["evaluacion"] = ""
 
 
-# Entorno de la app
+# Entorno de la app: web scrapping
 st.title("Validación de Contenidos de Redes Sociales")
 
 url = st.text_input("Ingresa la URL del posteo de la red social:")
@@ -152,13 +152,13 @@ if url and st.button("Procesar URL"):
             if "driver" in locals():
                 driver.quit()
 
-# Mostrar los resultados del scraping si están disponibles
+# Entorno de la app: validación e interacción con el usuario
 if st.session_state["page_title"] or st.session_state["post_content"]:
     st.subheader("Resultado del Web Scraping")
     st.write(f"**Título de la Página:** {st.session_state['page_title']}")
     st.text_area("Contenido del Posteo:", st.session_state["post_content"], height=300)
 
-    # Pregunta al usuario si el contenido es correcto
+    # Verificar si el contenido escaneado es correcto
     is_correct = st.radio("¿El contenido extraído es correcto?", ("Sí", "No"), index=0)
 
     if st.button("Confirmar Validación"):
@@ -168,7 +168,7 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
             # Verificar post_content y aplicar la evaluacion automática
             if "post_content" in st.session_state and st.session_state["post_content"]:
                 st.session_state["evaluacion"] = evaluar_contribucion(st.session_state["post_content"])
-                st.subheader("Resultados del GPT")
+                st.subheader("Resultados de la evaluación automática")
                 st.json(st.session_state["evaluacion"])
             else:
                 st.warning("El contenido del post no está disponible. Por favor, revisa el scraping.")
