@@ -165,7 +165,7 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
 
     if st.button("Confirmar Validación"):
         if is_correct == "Sí":
-            st.success("¡Gracias! El contenido ha sido validado correctamente.")
+            st.success("El contenido ha sido validado.")
 
             # Verificar post_content y aplicar la evaluacion automática
             if "post_content" in st.session_state and st.session_state["post_content"]:
@@ -173,10 +173,10 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
                 st.subheader("Resultados de la evaluación automática")
                 st.json(st.session_state["evaluacion"])
             else:
-                st.warning("El contenido del post no está disponible. Por favor, revisa el scraping.")
+                st.warning("El contenido del post no está disponible. Lo revisaremos manualmente.")
             
             # Preguntar corrección manual
-            st.subheader("Ajustar los Valores")
+            st.subheader("Entrenando el algoritmo colectivamente")
             criterios = ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]
             valores_corregidos = {}
             for criterio in criterios:
