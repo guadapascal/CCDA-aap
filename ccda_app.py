@@ -165,9 +165,9 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
 
     if st.button("Confirmar Validación"):
         if is_correct == "Sí":
-            st.success("El contenido ha sido validado correctamente. Aguarde a la próxima etapa.")
+            st.success("El contenido ha sido validado correctamente. Ahora se está procesando, aguarde unos instantes por favor.")
 
-            # Verificar post_content y aplicar la evaluacion automática
+            # Aplicar la evaluacion automática
             if "post_content" in st.session_state and st.session_state["post_content"]:
                 st.session_state["evaluacion"] = evaluar_contribucion(st.session_state["post_content"])
                 st.subheader("Resultados de la evaluación automática")
@@ -175,18 +175,29 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
             else:
                 st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
             
-            # Preguntar corrección manual
+            # Inicializar los valores de los criterios en `session_state`
+            if "valores_corregidos" not in st.session_state:
+                st.session_state["valores_corregidos"] = {
+                    "Lenguaje Inclusivo": st.session_state["evaluacion"].get("Lenguaje Inclusivo", 1),
+                    "Diversidad": st.session_state["evaluacion"].get("Diversidad", 1),
+                    "Historia": st.session_state["evaluacion"].get("Historia", 1),
+                    "Estereotipos": st.session_state["evaluacion"].get("Estereotipos", 1),
+                }
+            
+            # Ajustar los criterios manualmente
             st.subheader("Entrenando el algoritmo colectivamente")
             criterios = ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]
             valores_corregidos = {}
 
-            # Ajustar los criterios manualmente
-            for criterio in criterios:
-                valores_corregidos[criterio] = st.slider(
-                    f"Ajustar {criterio}:", 
-                    min_value = 1, 
-                    max_value = 4, 
-                    value = st.session_state["evaluacion"].get(criterio,1), #Valor predeterminado: 1
+           # Ajustar los criterios manualmente
+            st.subheader("Entrenando el algoritmo colectivamente")
+            for criterio in st.session_state["valores_corregidos"].keys():
+                st.session_state["valores_corregidos"][criterio] = st.slider(
+                    f"Ajustar {criterio}:",
+                    min_value=1,
+                    max_value=4,
+                    value=st.session_state["valores_corregidos"][criterio],
+                    key=criterio,
                 )
             
             # Botón para guardar la evaluación
@@ -200,15 +211,15 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
                     st.session_state["evaluacion"].get("Diversidad", ""),
                     st.session_state["evaluacion"].get("Historia", ""),
                     st.session_state["evaluacion"].get("Estereotipos", ""),
-                    valores_corregidos.get("Lenguaje Inclusivo", ""), 
-                    valores_corregidos.get("Diversidad", ""),
-                    valores_corregidos.get("Historia", ""),
-                    valores_corregidos.get("Estereotipos", "")
+                    st.session_state["valores_corregidos"]["Lenguaje Inclusivo"],
+                    st.session_state["valores_corregidos"]["Diversidad"],
+                    st.session_state["valores_corregidos"]["Historia"],
+                    st.session_state["valores_corregidos"]["Estereotipos"]
                 ]]
                 append_to_sheet(new_data)
                 st.success("La evaluación ha sido guardada correctamente.")
         else:
-            st.warning("Lamentablemente algo falló. Hemos registrado la URL, lo revisaremos manualmente.")
+            st.warning("Lamentablemente algo falló. Lo revisaremos manualmente.")
         
         # Guardar los resultados en Google Sheets
         new_data = [[url, st.session_state["page_title"], st.session_state["post_content"], is_correct]]
