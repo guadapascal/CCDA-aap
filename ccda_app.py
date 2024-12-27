@@ -26,7 +26,7 @@ SPREADSHEET_ID = '1NtXDHphN_SC6fmAb2Ni6tYJGb7CiRgGuYqMJbclwAr0'
 try:
     #openai.api_key = st.secrets["openai_api_key"]
     client = OpenAI(
-        api_key=os.environ.get(st.secrets["openai_api_key"]),  # This is the default and can be omitted
+        api_key=os.environ.get(st.secrets["openai_api_key"]),  
     )
     st.write("Clave configurada correctamente.")        
 except Exception as e:
