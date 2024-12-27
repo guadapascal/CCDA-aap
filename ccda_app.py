@@ -30,7 +30,7 @@ try:
 except Exception as e:
     st.error(f"Error al configurar la clave: {e}")
 
-client = OpenA(
+client = OpenAI(
     api_key=os.environ.get(openai.api_key),
 )
 
