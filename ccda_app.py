@@ -214,7 +214,7 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
             st.session_state["post_content"],  # Contenido
             is_correct,  # Validación
         ]
-        update_or_append_to_sheet(
+        update_sheet(
             st.session_state["id_contribucion"], validation_data,
             ["ID_contribucion", "URL", "Título", "Contenido", "Validación"]
         )
