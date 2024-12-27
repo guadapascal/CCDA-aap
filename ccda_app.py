@@ -101,7 +101,8 @@ def evaluar_contribucion(contribucion):
             ],
             temperature=0.7
         )
-        evaluacion = response["choices"][0]["message"]["content"]
+        #evaluacion = response["choices"][0]["message"]["content"]
+        evaluacion = response.choices[0].message.content
         st.success("Evaluación automática completada")
         return evaluacion
     except Exception as e:
