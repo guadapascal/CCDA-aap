@@ -104,7 +104,7 @@ def evaluar_contribucion(contribucion):
         evaluacion = json.loads(evaluacion_json)
         st.success("Evaluación automática completada")
         return evaluacion
-   except json.JSONDecodeError as e:
+    except json.JSONDecodeError as e:
         st.error(f"Error al interpretar la respuesta del modelo como JSON: {e}")
         return {}
     except Exception as e:
