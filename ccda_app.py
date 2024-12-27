@@ -24,7 +24,10 @@ SPREADSHEET_ID = '1NtXDHphN_SC6fmAb2Ni6tYJGb7CiRgGuYqMJbclwAr0'
 
 # Configurar OpenAI
 try:
-    openai.api_key = st.secrets["openai_api_key"]
+    #openai.api_key = st.secrets["openai_api_key"]
+    client = OpenAI(
+        api_key=os.environ.get(st.secrets["openai_api_key"]),  # This is the default and can be omitted
+    )
     st.write("Clave configurada correctamente.")        
 except Exception as e:
     st.error(f"Error al configurar la clave: {e}")
