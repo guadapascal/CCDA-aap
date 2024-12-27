@@ -212,26 +212,26 @@ if st.session_state["evaluacion"]:
             key=f"slider_{criterio}"
         )
         
-    # Botón para guardar la evaluación ajustada
-    if st.button("Guardar Evaluación"):
-        # Consolifar datos para guardar en Google Sheets
-        new_data = [[
-            url, 
-            st.session_state["page_title"], 
-            st.session_state["post_content"],
-            st.session_state["evaluacion"]["Lenguaje Inclusivo"], 
-            st.session_state["evaluacion"]["Diversidad"],
-            st.session_state["evaluacion"]["Historia"], 
-            st.session_state["evaluacion"]["Estereotipos"],
-            st.session_state["valores_corregidos"]["Lenguaje Inclusivo"], 
-            st.session_state["valores_corregidos"]["Diversidad"],
-            st.session_state["valores_corregidos"]["Historia"], 
-            st.session_state["valores_corregidos"]["Estereotipos"]
-        ]]
-        append_to_sheet(new_data)
-        st.success("La evaluación ha sido guardada correctamente.")
-    else:
-        st.warning("Lamentablemente algo falló. Lo revisaremos manualmente.")
+# Botón para guardar la evaluación ajustada
+if st.button("Guardar Evaluación"):
+    # Consolifar datos para guardar en Google Sheets
+    new_data = [[
+        url, 
+        st.session_state["page_title"], 
+        st.session_state["post_content"],
+        st.session_state["evaluacion"]["Lenguaje Inclusivo"], 
+        st.session_state["evaluacion"]["Diversidad"],
+        st.session_state["evaluacion"]["Historia"], 
+        st.session_state["evaluacion"]["Estereotipos"],
+        st.session_state["valores_corregidos"]["Lenguaje Inclusivo"], 
+        st.session_state["valores_corregidos"]["Diversidad"],
+        st.session_state["valores_corregidos"]["Historia"], 
+        st.session_state["valores_corregidos"]["Estereotipos"]
+    ]]
+    append_to_sheet(new_data)
+    st.success("La evaluación ha sido guardada correctamente.")
+ else:
+    st.warning("Lamentablemente algo falló. Lo revisaremos manualmente.")
         
         # Guardar los resultados en Google Sheets
         #new_data = [[url, st.session_state["page_title"], st.session_state["post_content"], is_correct]]
