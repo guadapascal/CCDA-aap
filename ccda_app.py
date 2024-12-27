@@ -221,11 +221,23 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
         if is_correct == "Sí":
             st.success("El contenido ha sido validado correctamente.")
             
-            # Aplicar la evaluacion automática
-            if "post_content" in st.session_state and st.session_state["post_content"]:
+            # Aplicar la evaluación automática de la contribución
+            if st.session_state["post_content"] and st.session_state["evaluacion"] == "":
+                st.subheader("Evaluación automática de la contribución")
                 st.session_state["evaluacion"] = evaluar_contribucion(st.session_state["post_content"])
-                st.subheader("Resultados de la evaluación automática")
                 st.json(st.session_state["evaluacion"])
+
+                # Actualizar el registro con los resultados de la evaluación automática
+                eval_data = [
+                    st.session_state["evaluacion"]["Lenguaje Inclusivo"],
+                    st.session_state["evaluacion"]["Diversidad"],
+                    st.session_state["evaluacion"]["Historia"],
+                    st.session_state["evaluacion"]["Estereotipos"]
+                ]
+                eval_columns = [5, 6, 7, 8]  # Columnas para los criterios en el registro
+                update_sheet(st.session_state["id_contribucion"], eval_data, eval_columns)
+                st.success("Resultados de la evaluación automática guardados.")
+            
             else:
                 st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
             
@@ -240,47 +252,32 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
         else:
             st.warning("Lamentablemente el contenido no es válido, lo revisaremos manualmente.")
 
-# Ajustar los criterios manualmente
+# Mostrar reultados y ajustarlos manualmente
 if st.session_state["evaluacion"]:
+    st.subheader("Resultados de la evaluación automática")
+    st.json(st.session_state["evaluacion"])
+
+    # Etapa: Ajustar los valores manualmente
     st.subheader("Entrenando el algoritmo colectivamente")
-
-    # Diccionario para almacenar los valores corregidos
-    if "valores_corregidos" not in st.session_state:
-        st.session_state["valores_corregidos"] = {
-            "Lenguaje Inclusivo": st.session_state["evaluacion"]["Lenguaje Inclusivo"],
-            "Diversidad": st.session_state["evaluacion"]["Diversidad"],
-            "Historia": st.session_state["evaluacion"]["Historia"],
-            "Estereotipos": st.session_state["evaluacion"]["Estereotipos"],
-        }
-
-    # Mostrar sliders para cada criterio
-    for criterio, valor in st.session_state["valores_corregidos"].items():
-        st.session_state["valores_corregidos"][criterio] = st.slider(
-            f"Ajustar {criterio}:",
-            min_value=1,
-            max_value=4,
-            value=st.session_state["valores_corregidos"][criterio],
-            key=f"slider_{criterio}"
+    criterios = ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]
+    valores_corregidos = {}
+    for criterio in criterios:
+        valores_corregidos[criterio] = st.slider(
+            f"Ajustar {criterio}:", 1, 4, st.session_state["evaluacion"][criterio]
         )
         
-    # Botón para guardar la evaluación ajustada
-    if st.button("Guardar Evaluación", key = "guardar_evaluacion"):
-        # Consolifar datos para guardar en Google Sheets
-        new_data = [[
-            url, 
-            st.session_state["page_title"], 
-            st.session_state["post_content"],
-            st.session_state["evaluacion"]["Lenguaje Inclusivo"], 
-            st.session_state["evaluacion"]["Diversidad"],
-            st.session_state["evaluacion"]["Historia"], 
-            st.session_state["evaluacion"]["Estereotipos"],
+    # Botón "Guardar evaluación"
+    if st.button("Guardar Evaluación Ajustada"):
+        # Actualizar el registro con los valores ajustados
+        ajusted_data = [
             st.session_state["valores_corregidos"]["Lenguaje Inclusivo"], 
             st.session_state["valores_corregidos"]["Diversidad"],
             st.session_state["valores_corregidos"]["Historia"], 
             st.session_state["valores_corregidos"]["Estereotipos"]
-        ]]
-        append_to_sheet(new_data)
-        st.success("La evaluación ha sido guardada correctamente.")
+        ]
+        ajusted_columns = [9, 10, 11, 12]  # Columnas para los valores ajustados
+        update_sheet(st.session_state["id_contribucion"], ajusted_data, ajusted_columns)
+        st.success("Resultados ajustados guardados correctamente.")
     else:
         st.warning("Lamentablemente algo falló. Lo revisaremos manualmente.")
         
