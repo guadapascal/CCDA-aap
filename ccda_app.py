@@ -31,7 +31,7 @@ except Exception as e:
     st.error(f"Error al configurar la clave: {e}")
 
 client = OpenAI(
-    api_key=os.environ.get(openai.api_key),
+    api_key=os.environ.get("openai_api_key"),
 )
 
 # Función para agregar datos a Google Sheets
