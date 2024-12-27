@@ -92,13 +92,13 @@ def evaluar_contribucion(contribucion):
         texto_limpio = limpiar_texto(contribucion)
         #response = openai.chat.completion.create(
         response = client.chat.completions.create(
+            model="gpt-4",
             messages=[
                 {
                     "role": "user", 
                     "content": prompt,
                 }
             ],
-            model="gpt-4",
             temperature=0.7
         )
         evaluacion = response["choices"][0]["message"]["content"]
