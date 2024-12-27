@@ -90,7 +90,6 @@ def evaluar_contribucion(contribucion):
     """
     try:
         texto_limpio = limpiar_texto(contribucion)
-        #response = openai.chat.completion.create(
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[
@@ -101,10 +100,13 @@ def evaluar_contribucion(contribucion):
             ],
             temperature=0.7
         )
-        #evaluacion = response["choices"][0]["message"]["content"]
-        evaluacion = response.choices[0].message.content
+        evaluacion_json = response.choices[0].message.content
+        evaluacion = json.loads(evaluacion_json)
         st.success("Evaluación automática completada")
         return evaluacion
+   except json.JSONDecodeError as e:
+        st.error(f"Error al interpretar la respuesta del modelo como JSON: {e}")
+        return {}
     except Exception as e:
         st.error(f"Error al interactuar con la API de OpenAI: {e}")
         return {}
