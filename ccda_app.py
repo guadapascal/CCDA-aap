@@ -183,24 +183,25 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
                     "Historia": st.session_state["evaluacion"].get("Historia", 1),
                     "Estereotipos": st.session_state["evaluacion"].get("Estereotipos", 1),
                 }
-            
-            # Ajustar los criterios manualmente
-            st.subheader("Entrenando el algoritmo colectivamente")
-            criterios = ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]
-            valores_corregidos = {}
+            # Guardar los resultados iniciales en Google Sheets
+            new_data = [[url, st.session_state["page_title"], st.session_state["post_content"], is_correct]]
+            append_to_sheet(new_data)
+        else:
+            st.warning("Lamentablemente la app no logra recuperar automáticamente el contenido, lo revisaremos manualmente.")
 
-           # Ajustar los criterios manualmente
-            st.subheader("Entrenando el algoritmo colectivamente")
-            for criterio in st.session_state["valores_corregidos"].keys():
-                st.session_state["valores_corregidos"][criterio] = st.slider(
-                    f"Ajustar {criterio}:",
-                    min_value=1,
-                    max_value=4,
-                    value=st.session_state["valores_corregidos"][criterio],
-                    key=criterio,
-                )
-            
-            # Botón para guardar la evaluación
+    # Ajustar los criterios manualmente
+    if "evaluacion" in st.session_state and st.session_state["evaluacion"]:        
+        st.subheader("Entrenando el algoritmo colectivamente")
+        for criterio in st.session_state["valores_corregidos"].keys():
+            st.session_state["valores_corregidos"][criterio] = st.slider(
+                f"Ajustar {criterio}:",
+                min_value=1,
+                max_value=4,
+                value=st.session_state["valores_corregidos"][criterio],
+                key=criterio,
+            )
+        
+            # Botón para guardar la evaluación corregida
             if st.button("Guardar Evaluación"):
                 # Consolifar datos para guardar en Google Sheets
                 new_data = [[
