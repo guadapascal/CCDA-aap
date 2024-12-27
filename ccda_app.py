@@ -88,7 +88,8 @@ def evaluar_contribucion(contribucion):
     """
     try:
         texto_limpio = limpiar_texto(contribucion)
-        response = openai.ChatCompletion.create(
+        #response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             messages=[
                 {
                     "role": "user", 
