@@ -14,6 +14,7 @@ import openai
 import json
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+import uuid
 
 # Configurar Google Sheets
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
@@ -34,24 +35,6 @@ client = OpenAI(
     api_key=os.environ.get("openai_api_key"),
 )
 
-# Función para agregar datos a Google Sheets
-def append_to_sheet(data):
-    try:
-        sheet = sheet_service.spreadsheets()
-        body = {'values': data}
-        result = sheet.values().append(
-            spreadsheetId=SPREADSHEET_ID,
-            range="Hoja1!A1",
-            valueInputOption="RAW",
-            insertDataOption="INSERT_ROWS",
-            body=body
-        ).execute()
-        st.write("Datos guardados exitosamente en Google Sheets.")  # Mensaje de debug
-        return result
-    except Exception as e:
-        st.error(f"No se pudo actualizar Google Sheets: {e}")
-        print(e)  # Mensaje de debug
-
 # Función para inicializar el driver de Selenium
 def get_driver():
     options = Options()
@@ -63,6 +46,11 @@ def get_driver():
         service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()),
         options=options,
     )
+
+# Función para generar un ID único
+def generar_id():
+    return str(uuid.uuid4())  
+
 # Función para limpiar el texto
 def limpiar_texto(texto):
     try:
@@ -71,6 +59,69 @@ def limpiar_texto(texto):
     except Exception as e:
         st.error(f"Error al procesar el contenido del texto: {e}")
         return ""
+
+# Función para agregar datos a Google Sheets
+#def append_to_sheet(data):
+#    try:  
+#        sheet = sheet_service.spreadsheets()
+#        body = {'values': data}
+#       result = sheet.values().append(
+#           spreadsheetId=SPREADSHEET_ID,
+#            range="Hoja1!A1",
+#            valueInputOption="RAW",
+#            insertDataOption="INSERT_ROWS",
+#            body=body
+#        ).execute()
+#        st.write("Datos guardados exitosamente en Google Sheets.")  # Mensaje de debug
+#        return result
+#    except Exception as e:
+#        st.error(f"No se pudo actualizar Google Sheets: {e}")
+#        print(e)  # Mensaje de debug
+
+# Modificar la función `update_or_append_to_sheet` para manejar las diferentes etapas
+def update_sheet(id_contribucion, data, columnas):
+    try:
+        # Leer todas las filas existentes en la hoja
+        sheet = sheet_service.spreadsheets()
+        result = sheet.values().get(
+            spreadsheetId=SPREADSHEET_ID,
+            range="Hoja1"
+        ).execute()
+        values = result.get("values", [])
+
+        # Buscar el registro basado en `ID_contribucion`
+        row_index = None
+        for i, row in enumerate(values):
+            if row and row[0] == id_contribucion:  # Asume que el ID está en la primera columna
+                row_index = i + 1  # La API de Google Sheets usa índices basados en 1
+                break
+
+        if row_index:
+            # Actualizar el registro existente
+            range_to_update = f"Hoja1!A{row_index}:{chr(65 + len(columnas) - 1)}{row_index}"
+            body = {"values": [data]}
+            sheet.values().update(
+                spreadsheetId=SPREADSHEET_ID,
+                range=range_to_update,
+                valueInputOption="RAW",
+                body=body
+            ).execute()
+            st.success("El registro existente ha sido actualizado correctamente.")
+        else:
+            # Crear un nuevo registro con las columnas especificadas
+            body = {"values": [data]}
+            sheet.values().append(
+                spreadsheetId=SPREADSHEET_ID,
+                range="Hoja1",
+                valueInputOption="RAW",
+                insertDataOption="INSERT_ROWS",
+                body=body
+            ).execute()
+            st.success("El registro ha sido agregado correctamente.")
+    except Exception as e:
+        st.error(f"No se pudo actualizar Google Sheets: {e}")
+        print(e)
+
 
 # Función para evaluar una contribución
 def evaluar_contribucion(contribucion):
@@ -166,7 +217,10 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
     if st.button("Confirmar Validación"):
         if is_correct == "Sí":
             st.success("El contenido ha sido validado correctamente. Ahora se está procesando, aguarde unos instantes por favor.")
-
+            # Guardar los resultados iniciales en Google Sheets
+            new_data = [[url, st.session_state["page_title"], st.session_state["post_content"], is_correct]]
+            append_to_sheet(new_data)
+            
             # Aplicar la evaluacion automática
             if "post_content" in st.session_state and st.session_state["post_content"]:
                 st.session_state["evaluacion"] = evaluar_contribucion(st.session_state["post_content"])
@@ -182,10 +236,7 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
                     "Diversidad": st.session_state["evaluacion"].get("Diversidad", 1),
                     "Historia": st.session_state["evaluacion"].get("Historia", 1),
                     "Estereotipos": st.session_state["evaluacion"].get("Estereotipos", 1),
-                }
-            # Guardar los resultados iniciales en Google Sheets
-            new_data = [[url, st.session_state["page_title"], st.session_state["post_content"], is_correct]]
-            append_to_sheet(new_data)
+                }     
         else:
             st.warning("Lamentablemente la app no logra recuperar automáticamente el contenido, lo revisaremos manualmente.")
 
@@ -213,7 +264,7 @@ if st.session_state["evaluacion"]:
         )
         
     # Botón para guardar la evaluación ajustada
-    if st.button("Guardar Evaluación"):
+    if st.button("Guardar Evaluación", key = "guardar_evaluacion"):
         # Consolifar datos para guardar en Google Sheets
         new_data = [[
             url, 
