@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 import os
 from openai import OpenAI
+import openai
 import json
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
