@@ -127,19 +127,19 @@ def evaluar_contribucion(contribucion):
     Devuelve los resultados en formato JSON:
     
     {{
-        "Criterio 1. Uso deenguaje inclusivo": {{
+        "Lenguaje Inclusivo": {{
             x,
             Justificación breve del valor asignado para ese criterio."
         }},
-        "Criterio 2. Visibilización de la diversidad": {{
+        "Diversidad": {{
             x,
             Justificación breve del valor asignado para ese criterio."
         }},
-        "Criterio 3. Relevancia histórica y contexto": {{
+        "Histiria": {{
             x,
             Justificación breve del valor asignado para ese criterio."
         }},
-        "Criterio 4. Ausencia de estereotipos de género": {{
+        "Estereotipos": {{
             x,
             Justificación breve del valor asignado para ese criterio."
         }}
