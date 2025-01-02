@@ -124,14 +124,25 @@ def evaluar_contribucion(contribucion):
     3. Relevancia histórica y contexto (1-4).
     4. Ausencia de estereotipos de género (1-4).
 
-    Devuelve los resultados con el siguiente formato:
-    Breve descripción e interpretación en formato texto.
-    
-    Criterio 1. Uso de lenguaje inclusivo: X.
-    Criterio 2. Visibilización de la diversidad: X.
-    Criterio 3. Relevancia histórica y contexto: X.
-    Criterio 4. Ausencia de estereotipos de género: X.
-  
+    Devuelve los resultados exclusivamente en formato JSON:
+    {{ 
+        "Lenguaje Inclusivo": {{
+            "valor": x,
+            "Justificación": "Texto breve explicando la razón del valor asignado."
+        }},    
+        "Diversidad": {{
+            "valor": x,
+            "Justificación": "Texto breve explicando la razón del valor asignado."
+        }},
+        "Historia": {{
+            "valor": x,
+            "Justificación": "Texto breve explicando la razón del valor asignado."
+        }},
+        "Estereotipos": {{
+            "valor": x,
+            "Justificación": "Texto breve explicando la razón del valor asignado."
+        }}
+    }}
     """
     try:
         texto_limpio = limpiar_texto(contribucion)
@@ -143,38 +154,29 @@ def evaluar_contribucion(contribucion):
                     "content": prompt,
                 }
             ],
-            temperature = 0
+            temperature=0
         )
-        # Validar si el contenido de la respuesta existe
-        evaluacion_prompt = response.choices[0].message.content.strip()
+        # Obtener la respuesta de GPT
+        evaluacion_json = response.choices[0].message.content.strip()
+        st.write("Respuesta de GPT:", evaluacion_json)  # Mostrar la respuesta completa para debugging
 
-        # Mostrar la respuesta para depuración
-        st.write("Resultados:", evaluacion_prompt)
+        # Convertir la respuesta de GPT a un diccionario JSON
+        evaluacion = json.loads(evaluacion_json)
 
-        # Extraer los valores manualmente
-        evaluacion = {}
-        for linea in evaluacion_prompt.split("\n"):
-            if "Criterio 1" in linea:
-                evaluacion["Lenguaje Inclusivo"] = int(linea.split(":")[1].strip())
-            elif "Criterio 2" in linea:
-                evaluacion["Diversidad"] = int(linea.split(":")[1].strip())
-            elif "Criterio 3" in linea:
-                evaluacion["Historia"] = int(linea.split(":")[1].strip())
-            elif "Criterio 4" in linea:
-                evaluacion["Estereotipos"] = int(linea.split(":")[1].strip())
-
-        # Verificar si se extrajeron correctamente todos los valores
-        if len(evaluacion) == 4:
-            st.success("Evaluación automática completada")
+        # Validar que se hayan devuelto todos los criterios
+        if all(key in evaluacion for key in ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]):
+            st.success("Evaluación automática completada con justificaciones.")
             return evaluacion
         else:
-            st.error("No se pudieron extraer todos los valores de la respuesta.")
+            st.error("La respuesta no incluye todos los criterios esperados.")
             return {}
 
+    except json.JSONDecodeError as e:
+        st.error(f"Error al interpretar la respuesta del modelo como JSON: {e}")
+        return {}
     except Exception as e:
         st.error(f"Error al interactuar con la API de OpenAI: {e}")
         return {}
-
 
 # FLUJO DE LA APP
 
