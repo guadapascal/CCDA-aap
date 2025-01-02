@@ -290,10 +290,10 @@ if st.session_state["evaluacion"]:
         # Validar que los valores ajustados esten inicializados
         if "valores_corregidos" in st.session_state:
             ajusted_data = [
-                str(st.session_state["valores_corregidos"].get("Lenguaje Inclusivo", "")),  # Convertir a cadena
-                str(st.session_state["valores_corregidos"].get("Diversidad", "")),
-                str(st.session_state["valores_corregidos"].get("Historia", "")),
-                str(st.session_state["valores_corregidos"].get("Estereotipos", ""))
+                str(st.session_state["valores_corregidos"]["Lenguaje Inclusivo"]),  # Convertir a cadena
+                str(st.session_state["valores_corregidos"]["Diversidad"]),
+                str(st.session_state["valores_corregidos"]["Historia"]),
+                str(st.session_state["valores_corregidos"]["Estereotipos"])
             ]
             ajusted_columns = [9, 10, 11, 12]  # Columnas para los valores ajustados
             
