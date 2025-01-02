@@ -124,21 +124,8 @@ def evaluar_contribucion(contribucion):
     3. Relevancia histórica y contexto (1-4).
     4. Ausencia de estereotipos de género (1-4).
 
-    Devuelve los resultados exclusivamente en formato JSON:
-    {{ 
-        "Lenguaje Inclusivo": {{ x,
-            Texto breve explicando la razón del valor asignado.
-        }},    
-        "Diversidad": {{ x,
-            Texto breve explicando la razón del valor asignado.
-        }},
-        "Historia": {{ x,
-            Texto breve explicando la razón del valor asignado.
-        }},
-        "Estereotipos": {{ x,
-            Texto breve explicando la razón del valor asignado.
-        }}
-    }}
+    Devuelve los resultados en una tabla de 3 columnas. El orden de las columnas es el siguiente: Criterio, Valor, Descrpicón. En la columna descripción debe ir una justificación breve del valor asignado para ese criterio. 
+
     """
     try:
         texto_limpio = limpiar_texto(contribucion)
