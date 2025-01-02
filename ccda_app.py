@@ -208,39 +208,39 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
 
     if st.button("Confirmar Validación"):
     # Convertir los datos a cadenas antes de actualizar Google Sheets
-    validation_data = [
-        str(st.session_state["id_contribucion"]),  # ID único como cadena
-        str(url),  # URL
-        str(st.session_state["page_title"]),  # Título
-        str(st.session_state["post_content"]),  # Contenido
-        str(is_correct),  # Validación
-    ]
-    update_sheet(
-        st.session_state["id_contribucion"], validation_data,
-        ["ID_contribucion", "URL", "Título", "Contenido", "Validación"]
-    )
-    if is_correct == "Sí":
-        st.success("El contenido ha sido validado correctamente.")
+        validation_data = [
+            str(st.session_state["id_contribucion"]),  # ID único como cadena
+            str(url),  # URL
+            str(st.session_state["page_title"]),  # Título
+            str(st.session_state["post_content"]),  # Contenido
+            str(is_correct),  # Validación
+        ]
+        update_sheet(
+            st.session_state["id_contribucion"], validation_data,
+            ["ID_contribucion", "URL", "Título", "Contenido", "Validación"]
+        )
+        if is_correct == "Sí":
+            st.success("El contenido ha sido validado correctamente.")
         
-        # Aplicar la evaluación automática de la contribución
-        if st.session_state["post_content"] and st.session_state["evaluacion"] == "":
-            st.subheader("Evaluación automática de la contribución")
-            st.session_state["evaluacion"] = evaluar_contribucion(st.session_state["post_content"])
-            st.json(st.session_state["evaluacion"])
+            # Aplicar la evaluación automática de la contribución
+            if st.session_state["post_content"] and st.session_state["evaluacion"] == "":
+                st.subheader("Evaluación automática de la contribución")
+                st.session_state["evaluacion"] = evaluar_contribucion(st.session_state["post_content"])
+                st.json(st.session_state["evaluacion"])
 
-            # Actualizar el registro con los resultados de la evaluación automática
-            eval_data = [
-                str(st.session_state["evaluacion"]["Lenguaje Inclusivo"]),
-                str(st.session_state["evaluacion"]["Diversidad"]),
-                str(st.session_state["evaluacion"]["Historia"]),
-                str(st.session_state["evaluacion"]["Estereotipos"])
-            ]
-            eval_columns = ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]
-            update_sheet(st.session_state["id_contribucion"], eval_data, eval_columns)
-            st.success("Resultados de la evaluación automática guardados.")
+                # Actualizar el registro con los resultados de la evaluación automática
+                eval_data = [
+                    str(st.session_state["evaluacion"]["Lenguaje Inclusivo"]),
+                    str(st.session_state["evaluacion"]["Diversidad"]),
+                    str(st.session_state["evaluacion"]["Historia"]),
+                    str(st.session_state["evaluacion"]["Estereotipos"])
+                ]
+                eval_columns = ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]
+                update_sheet(st.session_state["id_contribucion"], eval_data, eval_columns)
+                st.success("Resultados de la evaluación automática guardados.")
         
-        else:
-            st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
+            else:
+                st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
 
 # Mostrar reultados y ajustarlos manualmente
 if st.session_state["evaluacion"]:
