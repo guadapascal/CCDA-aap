@@ -124,8 +124,14 @@ def evaluar_contribucion(contribucion):
     3. Relevancia histórica y contexto (1-4).
     4. Ausencia de estereotipos de género (1-4).
 
-    Devuelve los resultados en formato JSON:
-    {{ "Lenguaje Inclusivo": x, "Diversidad": x, "Historia": x, "Estereotipos": x }}
+    Devuelve los resultados con el siguiente formato:
+    Breve descripción e interpretación en formato texto.
+    Valores para cada crtirio: 
+    Criterio 1. Uso de lenguaje inclusivo: X.
+    Criterio 2. Visibilización de la diversidad: X.
+    Criterio 3. Relevancia histórica y contexto: X.
+    Criterio 4. Ausencia de estereotipos de género: X.
+  
     """
     try:
         texto_limpio = limpiar_texto(contribucion)
@@ -137,25 +143,34 @@ def evaluar_contribucion(contribucion):
                     "content": prompt,
                 }
             ],
-            temperature=0.7
+            temperature = 0.5
         )
         # Validar si el contenido de la respuesta existe
-        evaluacion_json = response.choices[0].message.content.strip()
+        evaluacion_prompt = response.choices[0].message.content.strip()
 
         # Mostrar la respuesta para depuración
-        st.write("Respuesta de GPT:", evaluacion_json)
+        st.write("Resultados:", evaluacion_prompt)
 
-        # Validar que no esté vacío antes de intentar interpretarlo 
-        if not evaluacion_json:
-            raise ValueError("La respuesta de OpenAI está vacía.")
+        # Extraer los valores manualmente
+        evaluacion = {}
+        for linea in evaluacion_texto.split("\n"):
+            if "Criterio 1" in linea:
+                evaluacion["Lenguaje Inclusivo"] = int(linea.split(":")[1].strip())
+            elif "Criterio 2" in linea:
+                evaluacion["Diversidad"] = int(linea.split(":")[1].strip())
+            elif "Criterio 3" in linea:
+                evaluacion["Historia"] = int(linea.split(":")[1].strip())
+            elif "Criterio 4" in linea:
+                evaluacion["Estereotipos"] = int(linea.split(":")[1].strip())
 
-        # Intentar convertir la respuesta a JSON
-        evaluacion = json.loads(evaluacion_json)
-        st.success("Evaluación automática completada")
-        return evaluacion
-    except json.JSONDecodeError as e:
-        st.error(f"Error al interpretar la respuesta del modelo como JSON: {e}")
-        return {}
+        # Verificar si se extrajeron correctamente todos los valores
+        if len(evaluacion) == 4:
+            st.success("Evaluación automática completada")
+            return evaluacion
+        else:
+            st.error("No se pudieron extraer todos los valores de la respuesta.")
+            return {}
+
     except Exception as e:
         st.error(f"Error al interactuar con la API de OpenAI: {e}")
         return {}
