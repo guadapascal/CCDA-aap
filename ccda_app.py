@@ -107,7 +107,7 @@ def update_sheet(id_contribucion, data, columnas):
             st.success("El registro ha sido agregado correctamente.")
     except Exception as e:
         st.error(f"No se pudo actualizar Google Sheets: {e}")
-        print(e)
+        print(e) 
 
 # Función para evaluar una contribución
 def evaluar_contribucion(contribucion):
