@@ -259,7 +259,7 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
                 st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
 
 # Inicializar `valores_corregidos` en session_state
-if st.session_state["valores_corregidos"] and "valores_corregidos" not in st.session_state:
+if st.session_state["evaluacion"] and "valores_corregidos" not in st.session_state:
     st.session_state["valores_corregidos"] = {
         "Lenguaje Inclusivo": st.session_state["evaluacion"].get("Lenguaje Inclusivo", 1),
         "Diversidad": st.session_state["evaluacion"].get("Diversidad", 1),
