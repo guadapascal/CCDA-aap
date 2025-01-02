@@ -124,7 +124,18 @@ def evaluar_contribucion(contribucion):
     3. Relevancia histórica y contexto (1-4).
     4. Ausencia de estereotipos de género (1-4).
 
-    Devuelve los resultados en una tabla de 3 columnas. El orden de las columnas es el siguiente: Criterio, Valor, Descrpicón. En la columna descripción debe ir una justificación breve del valor asignado para ese criterio. 
+    Devuelve los resultados con el siguiente formato:
+    *Criterio 1. Uso de lenguaje inclusivo: x*
+    Justificación breve del valor asignado para ese criterio. 
+
+    *Criterio 2. Visibilización de la diversidad: x*
+    Justificación breve del valor asignado para ese criterio. 
+
+    *Criterio 3. Relevancia histórica y contexto: x*
+    Justificación breve del valor asignado para ese criterio. 
+
+    *Criterio 4. Ausencia de estereotipos de género: x*
+    Justificación breve del valor asignado para ese criterio. 
 
     """
     try:
