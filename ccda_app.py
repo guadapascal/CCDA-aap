@@ -108,7 +108,7 @@ def update_sheet(id_contribucion, data, columnas):
             ).execute()
             st.success("El registro ha sido agregado correctamente.")
     except Exception as e:
-        st.error(f"No se pudo actualizar Google Sheets: {e}")
+        st.error(f"Ups! Algo falló. No se pudo actualizar la base de datos: {e}")
         print(e)
 
 # Función para evaluar una contribución
@@ -139,7 +139,17 @@ def evaluar_contribucion(contribucion):
             ],
             temperature=0.7
         )
-        evaluacion_json = response.choices[0].message.content
+        # Validar si el contenido de la respuesta existe
+        evaluacion_json = response.choices[0].message.content.strip()
+
+        # Mostrar la respuesta para depuración
+        st.write("Respuesta de GPT:", evaluacion_json)
+
+        # Validar que no esté vacío antes de intentar interpretarlo 
+        if not evaluacion_json:
+            raise ValueError("La respuesta de OpenAI está vacía.")
+
+        # Intentar convertir la respuesta a JSON
         evaluacion = json.loads(evaluacion_json)
         st.success("Evaluación automática completada")
         return evaluacion
@@ -151,7 +161,13 @@ def evaluar_contribucion(contribucion):
         return {}
 
 
-# Verificar si `session_state` tiene las claves necesarias
+# FLUJO DE LA APP
+
+# ETAPA 1: Ingresar una contribución y realizar el scrapping
+st.title("Validación de Contenidos de Redes Sociales")
+url = st.text_input("Ingresa la URL del posteo de la red social:")
+
+# Verificacion si `session_state` tiene las claves necesarias)
 if "page_title" not in st.session_state:
     st.session_state["page_title"] = ""
 
@@ -160,12 +176,6 @@ if "post_content" not in st.session_state:
 
 if "evaluacion" not in st.session_state:
     st.session_state["evaluacion"] = ""
-
-
-# Entorno de la app: web scrapping
-st.title("Validación de Contenidos de Redes Sociales")
-url = st.text_input("Ingresa la URL del posteo de la red social:")
-
 
 # Botón "Procesar URL"
 if url and st.button("Procesar URL"):
@@ -238,7 +248,7 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
         if is_correct == "Sí":
             st.success("El contenido ha sido validado correctamente.")
         
-            # Aplicar la evaluación automática de la contribución
+            # ETAPA 2: Aplicar la evaluación automática de la contribución
             if st.session_state["post_content"] and st.session_state["evaluacion"] == "":
                 st.subheader("Evaluación automática de la contribución")
                 st.session_state["evaluacion"] = evaluar_contribucion(st.session_state["post_content"])
@@ -285,7 +295,7 @@ if st.session_state["evaluacion"]:
             key = f"slider_{criterio}"
         )
         
-    # Botón "Guardar evaluación"
+    # Botón "Guardar evaluación ajustada"
     if st.button("Guardar Evaluación Ajustada"):
         # Validar que los valores ajustados esten inicializados
         if "valores_corregidos" in st.session_state:
