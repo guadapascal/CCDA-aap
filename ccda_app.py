@@ -60,6 +60,7 @@ def limpiar_texto(texto):
         st.error(f"Error al procesar el contenido del texto: {e}")
         return ""
 
+# Función para ingresar y actualizar los datos en google sheet
 def update_sheet(id_contribucion, data, columnas):
     try:
         # Leer todas las filas existentes en la hoja
@@ -73,27 +74,29 @@ def update_sheet(id_contribucion, data, columnas):
         # Buscar el registro basado en `ID_contribucion`
         row_index = None
         for i, row in enumerate(values):
-            if row and row[0] == str(id_contribucion):  # Convertir ID a cadena para evitar errores
+            if row and row[0] == id_contribucion:  # Asume que el ID está en la primera columna
                 row_index = i + 1  # La API de Google Sheets usa índices basados en 1
                 break
 
         if row_index:
-            # Convertir todos los datos a cadena para evitar errores
-            data = [str(item) for item in data]
-            
-            # Actualizar el registro existente
-            range_to_update = f"Hoja1!A{row_index}:{chr(65 + len(columnas) - 1)}{row_index}"
-            body = {"values": [data]}
-            sheet.values().update(
-                spreadsheetId=SPREADSHEET_ID,
-                range=range_to_update,
-                valueInputOption="RAW",
-                body=body
-            ).execute()
+            # Actualizar solo las columnas indicadas
+            for i, value in enumerate(data):
+                column_letter = chr(65 + columnas[i] - 1)  # Convertir índice a letra de columna
+                cell_range = f"Hoja1!{column_letter}{row_index}"
+                body = {"values": [[value]]}
+                sheet.values().update(
+                    spreadsheetId=SPREADSHEET_ID,
+                    range=cell_range,
+                    valueInputOption="RAW",
+                    body=body
+                ).execute()
             st.success("El registro existente ha sido actualizado correctamente.")
         else:
-            # Crear un nuevo registro con las columnas especificadas
-            body = {"values": [data]}
+            # Crear un nuevo registro si no existe
+            new_row = [""] * max(columnas)  # Crear una fila vacía
+            for i, value in enumerate(data):
+                new_row[columnas[i] - 1] = value  # Insertar los datos en las columnas correctas
+            body = {"values": [new_row]}
             sheet.values().append(
                 spreadsheetId=SPREADSHEET_ID,
                 range="Hoja1",
@@ -105,7 +108,7 @@ def update_sheet(id_contribucion, data, columnas):
     except Exception as e:
         st.error(f"No se pudo actualizar Google Sheets: {e}")
         print(e)
-        
+
 # Función para evaluar una contribución
 def evaluar_contribucion(contribucion):
     prompt = f"""
@@ -242,6 +245,15 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
             else:
                 st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
 
+# Inicializar `valores_corregidos` en session_state
+if "valores_corregidos" not in st.session_state:
+    st.session_state["valores_corregidos"] = {
+        "Lenguaje Inclusivo": st.session_state["evaluacion"].get("Lenguaje Inclusivo", 1),
+        "Diversidad": st.session_state["evaluacion"].get("Diversidad", 1),
+        "Historia": st.session_state["evaluacion"].get("Historia", 1),
+        "Estereotipos": st.session_state["evaluacion"].get("Estereotipos", 1),
+    }
+
 # Mostrar reultados y ajustarlos manualmente
 if st.session_state["evaluacion"]:
     st.subheader("Resultados de la evaluación automática")
@@ -258,18 +270,19 @@ if st.session_state["evaluacion"]:
         
     # Botón "Guardar evaluación"
     if st.button("Guardar Evaluación Ajustada"):
-        # Actualizar el registro con los valores ajustados
-        ajusted_data = [
-            st.session_state["valores_corregidos"]["Lenguaje Inclusivo"], 
-            st.session_state["valores_corregidos"]["Diversidad"],
-            st.session_state["valores_corregidos"]["Historia"], 
-            st.session_state["valores_corregidos"]["Estereotipos"]
-        ]
-        ajusted_columns = [9, 10, 11, 12]  # Columnas para los valores ajustados
-        update_sheet(st.session_state["id_contribucion"], ajusted_data, ajusted_columns)
-        st.success("Resultados ajustados guardados correctamente.")
-    else:
-        st.warning("Lamentablemente algo falló. Lo revisaremos manualmente.")
+        if "valores_corregidos" in st.session_state:
+        # Actualizar las columnas correspondientes en Google Sheets
+            ajusted_data = [
+                st.session_state["valores_corregidos"]["Lenguaje Inclusivo"], 
+                st.session_state["valores_corregidos"]["Diversidad"],
+                st.session_state["valores_corregidos"]["Historia"], 
+                st.session_state["valores_corregidos"]["Estereotipos"]
+            ]
+            ajusted_columns = [9, 10, 11, 12]  # Columnas para los valores ajustados
+            update_sheet(st.session_state["id_contribucion"], ajusted_data, ajusted_columns)
+            st.success("Resultados ajustados guardados correctamente.")
+        else:
+            st.error("No se pudieron guardar los valores ajustados porque no están inicializados.")
         
         # Guardar los resultados en Google Sheets
         #new_data = [[url, st.session_state["page_title"], st.session_state["post_content"], is_correct]]
