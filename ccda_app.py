@@ -171,11 +171,17 @@ if url and st.button("Procesar URL"):
         # Generar un ID único
         if "id_contribucion" not in st.session_state:
             st.session_state["id_contribucion"] = create_id()
+        
+        # Validar datos
+        if not isinstance(st.session_state["id_contribucion"], str):
+            st.session_state["id_contribucion"] = str(st.session_state["id_contribucion"])
+        if not isinstance(url, str):
+            url = str(url)
 
         # Crear el registro inicial con ID y URL
         initial_data = [st.session_state["id_contribucion"], url]
         update_sheet(
-            st.session_state["id_contribucion"], initial_data, ["id_contribucion", "url"]
+            st.session_state["id_contribucion"], initial_data, ["ID_contribucion", "URL"]
         )
 
         # Realizar web scraping
@@ -233,12 +239,12 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
 
                 # Actualizar el registro con los resultados de la evaluación automática
                 eval_data = [
-                    str(st.session_state["evaluacion"]["Lenguaje Inclusivo"]),
-                    str(st.session_state["evaluacion"]["Diversidad"]),
-                    str(st.session_state["evaluacion"]["Historia"]),
-                    str(st.session_state["evaluacion"]["Estereotipos"])
+                    str(st.session_state["evaluacion"].get("Lenguaje Inclusivo", "")),
+                    str(st.session_state["evaluacion"].get("Diversidad", "")),
+                    str(st.session_state["evaluacion"].get("Historia", "")),
+                    str(st.session_state["evaluacion"].get("Estereotipos", ""))
                 ]
-                eval_columns = ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]
+                eval_columns = [5, 6, 7, 8]
                 update_sheet(st.session_state["id_contribucion"], eval_data, eval_columns)
                 st.success("Resultados de la evaluación automática guardados.")
         
@@ -272,11 +278,12 @@ if st.session_state["evaluacion"]:
     if st.button("Guardar Evaluación Ajustada"):
         if "valores_corregidos" in st.session_state:
         # Actualizar las columnas correspondientes en Google Sheets
+            # Validar datos
             ajusted_data = [
-                st.session_state["valores_corregidos"]["Lenguaje Inclusivo"], 
-                st.session_state["valores_corregidos"]["Diversidad"],
-                st.session_state["valores_corregidos"]["Historia"], 
-                st.session_state["valores_corregidos"]["Estereotipos"]
+                str(st.session_state["valores_corregidos"].get("Lenguaje Inclusivo", "")),  # Convertir a cadena
+                str(st.session_state["valores_corregidos"].get("Diversidad", "")),
+                str(st.session_state["valores_corregidos"].get("Historia", "")),
+                str(st.session_state["valores_corregidos"].get("Estereotipos", ""))
             ]
             ajusted_columns = [9, 10, 11, 12]  # Columnas para los valores ajustados
             update_sheet(st.session_state["id_contribucion"], ajusted_data, ajusted_columns)
