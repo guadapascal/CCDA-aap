@@ -60,9 +60,9 @@ def limpiar_texto(texto):
         st.error(f"Error al procesar el contenido del texto: {e}")
         return ""
 
-# Función para actualizar los datos en Google Sheets
-def update_sheet(id_contribucion, data, columns):
+def update_sheet(id_contribucion, data, columnas):
     try:
+        # Leer todas las filas existentes en la hoja
         sheet = sheet_service.spreadsheets()
         result = sheet.values().get(
             spreadsheetId=SPREADSHEET_ID,
@@ -73,24 +73,26 @@ def update_sheet(id_contribucion, data, columns):
         # Buscar el registro basado en `ID_contribucion`
         row_index = None
         for i, row in enumerate(values):
-            if row and row[0] == id_contribucion:  # Asume que el ID está en la primera columna
+            if row and row[0] == str(id_contribucion):  # Convertir ID a cadena para evitar errores
                 row_index = i + 1  # La API de Google Sheets usa índices basados en 1
                 break
 
         if row_index:
-            # Actualizar las columnas indicadas
-            for col_index, value in zip(columns, data):
-                range_to_update = f"Hoja1!{chr(65 + col_index)}{row_index}"
-                body = {"values": [[value]]}
-                sheet.values().update(
-                    spreadsheetId=SPREADSHEET_ID,
-                    range=range_to_update,
-                    valueInputOption="RAW",
-                    body=body
-                ).execute()
+            # Convertir todos los datos a cadena para evitar errores
+            data = [str(item) for item in data]
+            
+            # Actualizar el registro existente
+            range_to_update = f"Hoja1!A{row_index}:{chr(65 + len(columnas) - 1)}{row_index}"
+            body = {"values": [data]}
+            sheet.values().update(
+                spreadsheetId=SPREADSHEET_ID,
+                range=range_to_update,
+                valueInputOption="RAW",
+                body=body
+            ).execute()
             st.success("El registro existente ha sido actualizado correctamente.")
         else:
-            # Crear un nuevo registro
+            # Crear un nuevo registro con las columnas especificadas
             body = {"values": [data]}
             sheet.values().append(
                 spreadsheetId=SPREADSHEET_ID,
@@ -103,7 +105,7 @@ def update_sheet(id_contribucion, data, columns):
     except Exception as e:
         st.error(f"No se pudo actualizar Google Sheets: {e}")
         print(e)
-
+        
 # Función para evaluar una contribución
 def evaluar_contribucion(contribucion):
     prompt = f"""
@@ -205,51 +207,40 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
     is_correct = st.radio("¿El contenido extraído es correcto?", ("Sí", "No"), index=0)
 
     if st.button("Confirmar Validación"):
-        # Actualizar el registro con datos adicionales
-        validation_data = [
-            st.session_state["id_contribucion"],  # ID único
-            url,  # URL
-            st.session_state["page_title"],  # Título
-            st.session_state["post_content"],  # Contenido
-            is_correct,  # Validación
-        ]
-        update_sheet(
-            st.session_state["id_contribucion"], validation_data,
-            ["ID_contribucion", "URL", "Título", "Contenido", "Validación"]
-        )
-        if is_correct == "Sí":
-            st.success("El contenido ha sido validado correctamente.")
-            
-            # Aplicar la evaluación automática de la contribución
-            if st.session_state["post_content"] and st.session_state["evaluacion"] == "":
-                st.subheader("Evaluación automática de la contribución")
-                st.session_state["evaluacion"] = evaluar_contribucion(st.session_state["post_content"])
-                st.json(st.session_state["evaluacion"])
+    # Convertir los datos a cadenas antes de actualizar Google Sheets
+    validation_data = [
+        str(st.session_state["id_contribucion"]),  # ID único como cadena
+        str(url),  # URL
+        str(st.session_state["page_title"]),  # Título
+        str(st.session_state["post_content"]),  # Contenido
+        str(is_correct),  # Validación
+    ]
+    update_sheet(
+        st.session_state["id_contribucion"], validation_data,
+        ["ID_contribucion", "URL", "Título", "Contenido", "Validación"]
+    )
+    if is_correct == "Sí":
+        st.success("El contenido ha sido validado correctamente.")
+        
+        # Aplicar la evaluación automática de la contribución
+        if st.session_state["post_content"] and st.session_state["evaluacion"] == "":
+            st.subheader("Evaluación automática de la contribución")
+            st.session_state["evaluacion"] = evaluar_contribucion(st.session_state["post_content"])
+            st.json(st.session_state["evaluacion"])
 
-                # Actualizar el registro con los resultados de la evaluación automática
-                eval_data = [
-                    st.session_state["evaluacion"]["Lenguaje Inclusivo"],
-                    st.session_state["evaluacion"]["Diversidad"],
-                    st.session_state["evaluacion"]["Historia"],
-                    st.session_state["evaluacion"]["Estereotipos"]
-                ]
-                eval_columns = [5, 6, 7, 8]  # Columnas para los criterios en el registro
-                update_sheet(st.session_state["id_contribucion"], eval_data, eval_columns)
-                st.success("Resultados de la evaluación automática guardados.")
-            
-            else:
-                st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
-            
-            # Inicializar los valores de los criterios en `session_state`
-            if "valores_corregidos" not in st.session_state:
-                st.session_state["valores_corregidos"] = {
-                    "Lenguaje Inclusivo": st.session_state["evaluacion"].get("Lenguaje Inclusivo", 1),
-                    "Diversidad": st.session_state["evaluacion"].get("Diversidad", 1),
-                    "Historia": st.session_state["evaluacion"].get("Historia", 1),
-                    "Estereotipos": st.session_state["evaluacion"].get("Estereotipos", 1),
-                }     
+            # Actualizar el registro con los resultados de la evaluación automática
+            eval_data = [
+                str(st.session_state["evaluacion"]["Lenguaje Inclusivo"]),
+                str(st.session_state["evaluacion"]["Diversidad"]),
+                str(st.session_state["evaluacion"]["Historia"]),
+                str(st.session_state["evaluacion"]["Estereotipos"])
+            ]
+            eval_columns = ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]
+            update_sheet(st.session_state["id_contribucion"], eval_data, eval_columns)
+            st.success("Resultados de la evaluación automática guardados.")
+        
         else:
-            st.warning("Lamentablemente el contenido no es válido, lo revisaremos manualmente.")
+            st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
 
 # Mostrar reultados y ajustarlos manualmente
 if st.session_state["evaluacion"]:
