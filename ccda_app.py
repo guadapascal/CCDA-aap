@@ -259,33 +259,36 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
                 st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
 
 # Inicializar `valores_corregidos` en session_state
-#if "valores_corregidos" not in st.session_state:
-#    st.session_state["valores_corregidos"] = {
-#        "Lenguaje Inclusivo": st.session_state["evaluacion"].get("Lenguaje Inclusivo", 1),
-#        "Diversidad": st.session_state["evaluacion"].get("Diversidad", 1),
-#        "Historia": st.session_state["evaluacion"].get("Historia", 1),
-#        "Estereotipos": st.session_state["evaluacion"].get("Estereotipos", 1),
-#    }
+if st.session_state["valores_corregidos"] and "valores_corregidos" not in st.session_state:
+    st.session_state["valores_corregidos"] = {
+        "Lenguaje Inclusivo": st.session_state["evaluacion"].get("Lenguaje Inclusivo", 1),
+        "Diversidad": st.session_state["evaluacion"].get("Diversidad", 1),
+        "Historia": st.session_state["evaluacion"].get("Historia", 1),
+        "Estereotipos": st.session_state["evaluacion"].get("Estereotipos", 1),
+    }
 
-# Mostrar reultados y ajustarlos manualmente
+# Mostrar reultados y permitir ajustarlos manualmente
 if st.session_state["evaluacion"]:
     st.subheader("Resultados de la evaluación automática")
     st.json(st.session_state["evaluacion"])
 
-    # Etapa: Ajustar los valores manualmente
+    # Ajustar los valores manualmente mediante sliders
     st.subheader("Entrenando el algoritmo colectivamente")
     criterios = ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]
-    valores_corregidos = {}
+    
     for criterio in criterios:
-        valores_corregidos[criterio] = st.slider(
-            f"Ajustar {criterio}:", 1, 4, st.session_state["evaluacion"][criterio]
+        st.session_state["valores_corregidos"][criterio] = st.slider(
+            f"Ajustar {criterio}:",
+            min_value = 1,
+            max_value = 4,
+            value = st.session_state["valores_corregidos"][criterio],
+            key = f"slider_{criterio}"
         )
         
     # Botón "Guardar evaluación"
     if st.button("Guardar Evaluación Ajustada"):
+        # Validar que los valores ajustados esten inicializados
         if "valores_corregidos" in st.session_state:
-        # Actualizar las columnas correspondientes en Google Sheets
-            # Validar datos
             ajusted_data = [
                 str(st.session_state["valores_corregidos"].get("Lenguaje Inclusivo", "")),  # Convertir a cadena
                 str(st.session_state["valores_corregidos"].get("Diversidad", "")),
@@ -293,14 +296,14 @@ if st.session_state["evaluacion"]:
                 str(st.session_state["valores_corregidos"].get("Estereotipos", ""))
             ]
             ajusted_columns = [9, 10, 11, 12]  # Columnas para los valores ajustados
+            
+            # Actualizar las columnas correspondientes en Google Sheets
             update_sheet(st.session_state["id_contribucion"], ajusted_data, ajusted_columns)
             st.success("Resultados ajustados guardados correctamente.")
         else:
             st.error("No se pudieron guardar los valores ajustados porque no están inicializados.")
         
-        # Guardar los resultados en Google Sheets
-        #new_data = [[url, st.session_state["page_title"], st.session_state["post_content"], is_correct]]
-        #append_to_sheet(new_data)
+
         
         
 
