@@ -129,11 +129,11 @@ def evaluar_contribucion(contribucion):
         "Lenguaje Inclusivo": {{
             x,
             Texto breve explicando la razón del valor asignado.
-        },    
+        }},    
         "Diversidad": {{
             x,
             Texto breve explicando la razón del valor asignado.
-        },
+        }},
         "Historia": {{
             x,
             Texto breve explicando la razón del valor asignado.
