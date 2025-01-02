@@ -60,10 +60,9 @@ def limpiar_texto(texto):
         st.error(f"Error al procesar el contenido del texto: {e}")
         return ""
 
-# Función para agregar datos a Google Sheets
-def update_sheet(id_contribucion, data, columnas):
+# Función para actualizar los datos en Google Sheets
+def update_sheet(id_contribucion, data, columns):
     try:
-        # Leer todas las filas existentes en la hoja
         sheet = sheet_service.spreadsheets()
         result = sheet.values().get(
             spreadsheetId=SPREADSHEET_ID,
@@ -79,18 +78,19 @@ def update_sheet(id_contribucion, data, columnas):
                 break
 
         if row_index:
-            # Actualizar el registro existente
-            range_to_update = f"Hoja1!A{row_index}:{chr(65 + len(columnas) - 1)}{row_index}"
-            body = {"values": [data]}
-            sheet.values().update(
-                spreadsheetId=SPREADSHEET_ID,
-                range=range_to_update,
-                valueInputOption="RAW",
-                body=body
-            ).execute()
+            # Actualizar las columnas indicadas
+            for col_index, value in zip(columns, data):
+                range_to_update = f"Hoja1!{chr(65 + col_index)}{row_index}"
+                body = {"values": [[value]]}
+                sheet.values().update(
+                    spreadsheetId=SPREADSHEET_ID,
+                    range=range_to_update,
+                    valueInputOption="RAW",
+                    body=body
+                ).execute()
             st.success("El registro existente ha sido actualizado correctamente.")
         else:
-            # Crear un nuevo registro con las columnas especificadas
+            # Crear un nuevo registro
             body = {"values": [data]}
             sheet.values().append(
                 spreadsheetId=SPREADSHEET_ID,
@@ -103,7 +103,6 @@ def update_sheet(id_contribucion, data, columnas):
     except Exception as e:
         st.error(f"No se pudo actualizar Google Sheets: {e}")
         print(e)
-
 
 # Función para evaluar una contribución
 def evaluar_contribucion(contribucion):
