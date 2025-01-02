@@ -170,7 +170,7 @@ if url and st.button("Procesar URL"):
         # Crear el registro inicial con ID y URL
         initial_data = [st.session_state["id_contribucion"], url]
         update_sheet(
-            st.session_state["id_contribucion"], initial_data, [0, 1]
+            st.session_state["id_contribucion"], initial_data, ["id_contribucion", "url"]
         )
 
         # Realizar web scraping
