@@ -137,7 +137,7 @@ def evaluar_contribucion(contribucion):
                     "content": prompt,
                 }
             ],
-            temperature=0.7
+            temperature=0.4
         )
         # Validar si el contenido de la respuesta existe
         evaluacion_json = response.choices[0].message.content.strip()
