@@ -126,7 +126,7 @@ def evaluar_contribucion(contribucion):
 
     Devuelve los resultados con el siguiente formato:
     Breve descripción e interpretación en formato texto.
-    Valores para cada crtirio: 
+    
     Criterio 1. Uso de lenguaje inclusivo: X.
     Criterio 2. Visibilización de la diversidad: X.
     Criterio 3. Relevancia histórica y contexto: X.
@@ -143,7 +143,7 @@ def evaluar_contribucion(contribucion):
                     "content": prompt,
                 }
             ],
-            temperature = 0.5
+            temperature = 0
         )
         # Validar si el contenido de la respuesta existe
         evaluacion_prompt = response.choices[0].message.content.strip()
@@ -153,7 +153,7 @@ def evaluar_contribucion(contribucion):
 
         # Extraer los valores manualmente
         evaluacion = {}
-        for linea in evaluacion_texto.split("\n"):
+        for linea in evaluacion_prompt.split("\n"):
             if "Criterio 1" in linea:
                 evaluacion["Lenguaje Inclusivo"] = int(linea.split(":")[1].strip())
             elif "Criterio 2" in linea:
