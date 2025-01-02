@@ -60,12 +60,11 @@ def limpiar_texto(texto):
         st.error(f"Error al procesar el contenido del texto: {e}")
         return ""
 
-# Función para ingresar y actualizar los datos en google sheet
 def update_sheet(id_contribucion, data, columnas):
     try:
-        # Convertir índices de columna a letras (en caso de que sean números)
+        # Convertir índices de columna a letras si es necesario
         if isinstance(columnas[0], int):
-            columnas = [chr(65 + i) for i in columnas]  # Convertir a letras de columna
+            columnas = [chr(65 + i) for i in columnas]  # Convertir a letras de columna (A, B, C, ...)
 
         # Leer todas las filas existentes en la hoja
         sheet = sheet_service.spreadsheets()
@@ -83,8 +82,12 @@ def update_sheet(id_contribucion, data, columnas):
                 break
 
         if row_index:
+            # Generar el rango de actualización en formato válido
+            start_column = columnas[0]
+            end_column = columnas[-1]
+            range_to_update = f"Hoja1!{start_column}{row_index}:{end_column}{row_index}"
+
             # Actualizar el registro existente
-            range_to_update = f"Hoja1!A{row_index}:{columnas[-1]}{row_index}"
             body = {"values": [data]}
             sheet.values().update(
                 spreadsheetId=SPREADSHEET_ID,
@@ -216,17 +219,22 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
 
     if st.button("Confirmar Validación"):
     # Convertir los datos a cadenas antes de actualizar Google Sheets
+        # Actualizar el registro con los datos de validación
         validation_data = [
-            str(st.session_state["id_contribucion"]),  # ID único como cadena
+            str(st.session_state["id_contribucion"]),  # ID único
             str(url),  # URL
             str(st.session_state["page_title"]),  # Título
             str(st.session_state["post_content"]),  # Contenido
             str(is_correct),  # Validación
         ]
+        # Columnas para los datos
+        validation_columns = [0, 1, 2, 3, 4]  # Índices para A, B, C, D, E
         update_sheet(
-            st.session_state["id_contribucion"], validation_data,
-            ["ID_contribucion", "URL", "Título", "Contenido", "Validación"]
+            st.session_state["id_contribucion"],
+            validation_data,
+            validation_columns
         )
+
         if is_correct == "Sí":
             st.success("El contenido ha sido validado correctamente.")
         
