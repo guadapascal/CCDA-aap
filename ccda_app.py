@@ -124,19 +124,26 @@ def evaluar_contribucion(contribucion):
     3. Relevancia histórica y contexto (1-4).
     4. Ausencia de estereotipos de género (1-4).
 
-    Devuelve los resultados con el siguiente formato:
-    *Criterio 1. Uso de lenguaje inclusivo: x*
-    Justificación breve del valor asignado para ese criterio. 
-
-    *Criterio 2. Visibilización de la diversidad: x*
-    Justificación breve del valor asignado para ese criterio. 
-
-    *Criterio 3. Relevancia histórica y contexto: x*
-    Justificación breve del valor asignado para ese criterio. 
-
-    *Criterio 4. Ausencia de estereotipos de género: x*
-    Justificación breve del valor asignado para ese criterio. 
-
+    Devuelve los resultados en formato JSON:
+    
+    {{
+        "Criterio 1. Uso deenguaje inclusivo": {{
+            x,
+            Justificación breve del valor asignado para ese criterio."
+        }},
+        "Criterio 2. Visibilización de la diversidad": {{
+            x,
+            Justificación breve del valor asignado para ese criterio."
+        }},
+        "Criterio 3. Relevancia histórica y contexto": {{
+            x,
+            Justificación breve del valor asignado para ese criterio."
+        }},
+        "Criterio 4. Ausencia de estereotipos de género": {{
+            x,
+            Justificación breve del valor asignado para ese criterio."
+        }}
+    }}
     """
     try:
         texto_limpio = limpiar_texto(contribucion)
@@ -151,16 +158,16 @@ def evaluar_contribucion(contribucion):
             temperature=0
         )
         # Obtener la respuesta de GPT
-        evaluacion_json = response.choices[0].message.content.strip()
-        st.write("Respuesta de GPT:", evaluacion_json)  # Mostrar la respuesta completa para debugging
+        evaluacion = response.choices[0].message.content.strip()
+        st.write(evaluacion)  # Mostrar la respuesta completa para debugging
 
         # Convertir la respuesta de GPT a un diccionario JSON
-        evaluacion = json.loads(evaluacion_json)
+        evaluacion_json = json.loads(evaluacion)
 
         # Validar que se hayan devuelto todos los criterios
-        if all(key in evaluacion for key in ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]):
+        if all(key in evaluacion_json for key in ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]):
             st.success("Evaluación automática completada con justificaciones.")
-            return evaluacion
+            return evaluacion_json
         else:
             st.error("La respuesta no incluye todos los criterios esperados.")
             return {}
