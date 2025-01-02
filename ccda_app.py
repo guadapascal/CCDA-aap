@@ -63,6 +63,10 @@ def limpiar_texto(texto):
 # Función para ingresar y actualizar los datos en google sheet
 def update_sheet(id_contribucion, data, columnas):
     try:
+        # Convertir índices de columna a letras (en caso de que sean números)
+        if isinstance(columnas[0], int):
+            columnas = [chr(65 + i) for i in columnas]  # Convertir a letras de columna
+
         # Leer todas las filas existentes en la hoja
         sheet = sheet_service.spreadsheets()
         result = sheet.values().get(
@@ -79,24 +83,19 @@ def update_sheet(id_contribucion, data, columnas):
                 break
 
         if row_index:
-            # Actualizar solo las columnas indicadas
-            for i, value in enumerate(data):
-                column_letter = chr(65 + columnas[i] - 1)  # Convertir índice a letra de columna
-                cell_range = f"Hoja1!{column_letter}{row_index}"
-                body = {"values": [[value]]}
-                sheet.values().update(
-                    spreadsheetId=SPREADSHEET_ID,
-                    range=cell_range,
-                    valueInputOption="RAW",
-                    body=body
-                ).execute()
+            # Actualizar el registro existente
+            range_to_update = f"Hoja1!A{row_index}:{columnas[-1]}{row_index}"
+            body = {"values": [data]}
+            sheet.values().update(
+                spreadsheetId=SPREADSHEET_ID,
+                range=range_to_update,
+                valueInputOption="RAW",
+                body=body
+            ).execute()
             st.success("El registro existente ha sido actualizado correctamente.")
         else:
-            # Crear un nuevo registro si no existe
-            new_row = [""] * max(columnas)  # Crear una fila vacía
-            for i, value in enumerate(data):
-                new_row[columnas[i] - 1] = value  # Insertar los datos en las columnas correctas
-            body = {"values": [new_row]}
+            # Crear un nuevo registro con las columnas especificadas
+            body = {"values": [data]}
             sheet.values().append(
                 spreadsheetId=SPREADSHEET_ID,
                 range="Hoja1",
