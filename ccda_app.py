@@ -127,20 +127,20 @@ def evaluar_contribucion(contribucion):
     Devuelve los resultados exclusivamente en formato JSON:
     {{ 
         "Lenguaje Inclusivo": {{
-            "valor": x,
-            "Justificación": "Texto breve explicando la razón del valor asignado."
-        }},    
+            x,
+            Texto breve explicando la razón del valor asignado.
+        },    
         "Diversidad": {{
-            "valor": x,
-            "Justificación": "Texto breve explicando la razón del valor asignado."
-        }},
+            x,
+            Texto breve explicando la razón del valor asignado.
+        },
         "Historia": {{
-            "valor": x,
-            "Justificación": "Texto breve explicando la razón del valor asignado."
+            x,
+            Texto breve explicando la razón del valor asignado.
         }},
         "Estereotipos": {{
-            "valor": x,
-            "Justificación": "Texto breve explicando la razón del valor asignado."
+            x,
+            Texto breve explicando la razón del valor asignado.
         }}
     }}
     """
