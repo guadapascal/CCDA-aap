@@ -179,11 +179,8 @@ def evaluar_contribucion(contribucion):
         st.error(f"Error al interactuar con la API de OpenAI: {e}")
         return {}
 
-# FLUJO DE LA APP
 
-# ETAPA 1: Ingresar una contribución y realizar el scrapping
-st.title("Validación de Contenidos de Redes Sociales")
-url = st.text_input("Ingresa la URL del posteo de la red social:")
+# FLUJO DE LA APP
 
 # Verificacion si `session_state` tiene las claves necesarias)
 if "page_title" not in st.session_state:
@@ -197,6 +194,10 @@ if "evaluacion" not in st.session_state:
 
 if "evaluacion_json" not in st.session_state:
     st.session_state["evaluacion_json"] = ""
+
+# ETAPA 1: Ingresar una contribución y realizar el scrapping
+st.title("Validación de Contenidos de Redes Sociales")
+url = st.text_input("Ingresa la URL del posteo de la red social:")
 
 # Botón "Procesar URL"
 if url and st.button("Procesar URL"):
@@ -272,8 +273,8 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
             # ETAPA 2: Aplicar la evaluación automática de la contribución
             if st.session_state["post_content"] and st.session_state["evaluacion"] == "":
                 st.subheader("Evaluación automática de la contribución")
-                st.session_state["evaluacion"] = evaluar_contribucion(st.session_state["post_content"])
-                st.json(st.session_state["evaluacion"])
+                st.session_state["evaluacion_json"] = evaluar_contribucion(st.session_state["post_content"])
+                st.json(st.session_state["evaluacion_json"])
 
                 # Actualizar el registro con los resultados de la evaluación automática
                 eval_data = [
@@ -290,20 +291,20 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
                 st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
 
 # Inicializar `valores_corregidos` en session_state
-if st.session_state["evaluacion"] and "valores_corregidos" not in st.session_state:
+if st.session_state["evaluacion_json"] and "valores_corregidos" not in st.session_state:
     st.session_state["valores_corregidos"] = {
-        "Lenguaje Inclusivo": st.session_state["evaluacion"].get("Lenguaje Inclusivo", 1),
-        "Diversidad": st.session_state["evaluacion"].get("Diversidad", 1),
-        "Historia": st.session_state["evaluacion"].get("Historia", 1),
-        "Estereotipos": st.session_state["evaluacion"].get("Estereotipos", 1),
+        "Lenguaje Inclusivo": st.session_state["evaluacion_json"].get("Lenguaje Inclusivo", 1),
+        "Diversidad": st.session_state["evaluacion_json"].get("Diversidad", 1),
+        "Historia": st.session_state["evaluacion_json"].get("Historia", 1),
+        "Estereotipos": st.session_state["evaluacion_json"].get("Estereotipos", 1),
     }
 
 # Mostrar resultados y ajustar manualmente
-if st.session_state["evaluacion"]:
+if st.session_state["evaluacion_json"]:
     st.subheader("Resultados de la evaluación automática")
 
     # Mostrar los resultados originales con sus justificaciones
-    for criterio, datos in st.session_state["evaluacion"].items():
+    for criterio, datos in st.session_state["evaluacion_json"].items():
         st.write(f"**{criterio}:**")
         st.write(f"- **Puntuación:** {datos['Puntuación']}")
         st.write(f"- **Justificación:** {datos['Justificación']}")
@@ -314,11 +315,11 @@ if st.session_state["evaluacion"]:
     # Inicializar los valores corregidos en `session_state` si no existen
     if "valores_corregidos" not in st.session_state:
         st.session_state["valores_corregidos"] = {
-            criterio: datos["Puntuación"] for criterio, datos in st.session_state["evaluacion"].items()
+            criterio: datos["Puntuación"] for criterio, datos in st.session_state["evaluacion_json"].items()
         }
 
     # Mostrar sliders para ajustar cada criterio
-    for criterio, datos in st.session_state["evaluacion"].items():
+    for criterio, datos in st.session_state["evaluacion_json"].items():
         st.session_state["valores_corregidos"][criterio] = st.slider(
             f"Ajustar {criterio}:", 
             min_value=1, 
