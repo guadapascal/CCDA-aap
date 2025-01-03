@@ -128,20 +128,20 @@ def evaluar_contribucion(contribucion):
     
     {{
         "Lenguaje Inclusivo": {{
-            x,
-            Justificación breve del valor asignado para ese criterio."
+            "Puntuación": x,
+            "Justificación": justificación breve del valor asignado para ese criterio."
         }},
         "Diversidad": {{
-            x,
-            Justificación breve del valor asignado para ese criterio."
+            "Puntuación": x,
+            "Justificación": justificación breve del valor asignado para ese criterio."
         }},
         "Historia": {{
-            x,
-            Justificación breve del valor asignado para ese criterio."
+            "Puntuación": x,
+            "Justificación": justificación breve del valor asignado para ese criterio."
         }},
         "Estereotipos": {{
-            x,
-            Justificación breve del valor asignado para ese criterio."
+            "Puntuación": x,
+            "Justificación": justificación breve del valor asignado para ese criterio."
         }}
     }}
     """
@@ -267,17 +267,17 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
             st.success("El contenido ha sido validado correctamente.")
         
             # ETAPA 2: Aplicar la evaluación automática de la contribución
-            if st.session_state["post_content"] and st.session_state["evaluacion"] == "":
+            if st.session_state["post_content"] and st.session_state["evaluacion_json"] == "":
                 st.subheader("Evaluación automática de la contribución")
-                st.session_state["evaluacion"] = evaluar_contribucion(st.session_state["post_content"])
-                st.json(st.session_state["evaluacion"])
+                st.session_state["evaluacion_json"] = evaluar_contribucion(st.session_state["post_content"])
+                st.json(st.session_state["evaluacion_json"])
 
                 # Actualizar el registro con los resultados de la evaluación automática
                 eval_data = [
-                    str(st.session_state["evaluacion"].get("Lenguaje Inclusivo", "")),
-                    str(st.session_state["evaluacion"].get("Diversidad", "")),
-                    str(st.session_state["evaluacion"].get("Historia", "")),
-                    str(st.session_state["evaluacion"].get("Estereotipos", ""))
+                    str(st.session_state["evaluacion_json"].get("Lenguaje Inclusivo", "")),
+                    str(st.session_state["evaluacion_json"].get("Diversidad", "")),
+                    str(st.session_state["evaluacion_json"].get("Historia", "")),
+                    str(st.session_state["evaluacion_json"].get("Estereotipos", ""))
                 ]
                 eval_columns = [5, 6, 7, 8]
                 update_sheet(st.session_state["id_contribucion"], eval_data, eval_columns)
@@ -287,18 +287,18 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
                 st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
 
 # Inicializar `valores_corregidos` en session_state
-if st.session_state["evaluacion"] and "valores_corregidos" not in st.session_state:
+if st.session_state["evaluacion_json"] and "valores_corregidos" not in st.session_state:
     st.session_state["valores_corregidos"] = {
-        "Lenguaje Inclusivo": st.session_state["evaluacion"].get("Lenguaje Inclusivo", 1),
-        "Diversidad": st.session_state["evaluacion"].get("Diversidad", 1),
-        "Historia": st.session_state["evaluacion"].get("Historia", 1),
-        "Estereotipos": st.session_state["evaluacion"].get("Estereotipos", 1),
+        "Lenguaje Inclusivo": st.session_state["evaluacion_json"].get("Lenguaje Inclusivo", 1),
+        "Diversidad": st.session_state["evaluacion_json"].get("Diversidad", 1),
+        "Historia": st.session_state["evaluacion_json"].get("Historia", 1),
+        "Estereotipos": st.session_state["evaluacion_json"].get("Estereotipos", 1),
     }
 
 # Mostrar reultados y permitir ajustarlos manualmente
-if st.session_state["evaluacion"]:
+if st.session_state["evaluacion_json"]:
     st.subheader("Resultados de la evaluación automática")
-    st.json(st.session_state["evaluacion"])
+    st.json(st.session_state["evaluacion_json"])
 
     # Ajustar los valores manualmente mediante sliders
     st.subheader("Entrenando el algoritmo colectivamente")
