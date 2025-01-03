@@ -135,7 +135,7 @@ def evaluar_contribucion(contribucion):
             x,
             Justificación breve del valor asignado para ese criterio."
         }},
-        "Histiria": {{
+        "Historia": {{
             x,
             Justificación breve del valor asignado para ese criterio."
         }},
