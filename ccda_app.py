@@ -295,37 +295,46 @@ if st.session_state["evaluacion"] and "valores_corregidos" not in st.session_sta
         "Estereotipos": st.session_state["evaluacion"].get("Estereotipos", 1),
     }
 
-# Mostrar reultados y permitir ajustarlos manualmente
+# Mostrar resultados y ajustar manualmente
 if st.session_state["evaluacion"]:
     st.subheader("Resultados de la evaluación automática")
-    st.json(st.session_state["evaluacion"])
 
-    # Ajustar los valores manualmente mediante sliders
+    # Mostrar los resultados originales con sus justificaciones
+    for criterio, datos in st.session_state["evaluacion"].items():
+        st.write(f"**{criterio}:**")
+        st.write(f"- **Puntuación:** {datos['Puntuación']}")
+        st.write(f"- **Justificación:** {datos['Justificación']}")
+
+    # ETAPA 3: Ajustar los valores manualmente
     st.subheader("Entrenando el algoritmo colectivamente")
-    criterios = ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]
     
-    for criterio in criterios:
+    # Inicializar los valores corregidos en `session_state` si no existen
+    if "valores_corregidos" not in st.session_state:
+        st.session_state["valores_corregidos"] = {
+            criterio: datos["Puntuación"] for criterio, datos in st.session_state["evaluacion"].items()
+        }
+
+    # Mostrar sliders para ajustar cada criterio
+    for criterio, datos in st.session_state["evaluacion"].items():
         st.session_state["valores_corregidos"][criterio] = st.slider(
-            f"Ajustar {criterio}:",
-            min_value = 1,
-            max_value = 4,
-            value = st.session_state["valores_corregidos"][criterio],
-            key = f"slider_{criterio}"
+            f"Ajustar {criterio}:", 
+            min_value=1, 
+            max_value=4, 
+            value=datos["Puntuación"],  # Usamos "Puntuación" del JSON
+            key=f"slider_{criterio}"
         )
-        
+    
     # Botón "Guardar evaluación ajustada"
     if st.button("Guardar Evaluación Ajustada"):
-        # Validar que los valores ajustados esten inicializados
         if "valores_corregidos" in st.session_state:
+            # Actualizar las columnas correspondientes en Google Sheets
             ajusted_data = [
-                str(st.session_state["valores_corregidos"]["Lenguaje Inclusivo"]),  # Convertir a cadena
-                str(st.session_state["valores_corregidos"]["Diversidad"]),
-                str(st.session_state["valores_corregidos"]["Historia"]),
-                str(st.session_state["valores_corregidos"]["Estereotipos"])
+                str(st.session_state["valores_corregidos"].get("Lenguaje Inclusivo", "")),
+                str(st.session_state["valores_corregidos"].get("Diversidad", "")),
+                str(st.session_state["valores_corregidos"].get("Historia", "")),
+                str(st.session_state["valores_corregidos"].get("Estereotipos", ""))
             ]
             ajusted_columns = [9, 10, 11, 12]  # Columnas para los valores ajustados
-            
-            # Actualizar las columnas correspondientes en Google Sheets
             update_sheet(st.session_state["id_contribucion"], ajusted_data, ajusted_columns)
             st.success("Resultados ajustados guardados correctamente.")
         else:
