@@ -195,6 +195,9 @@ if "post_content" not in st.session_state:
 if "evaluacion" not in st.session_state:
     st.session_state["evaluacion"] = ""
 
+if "evaluacion_json" not in st.session_state:
+    st.session_state["evaluacion_json"] = ""
+
 # Botón "Procesar URL"
 if url and st.button("Procesar URL"):
     try:
