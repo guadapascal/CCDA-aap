@@ -273,7 +273,7 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
             st.success("El contenido ha sido validado correctamente.")
             
             # ETAPA 2: Aplicar la evaluación automática de la contribución
-            if st.sesion_state["post_content"] and st.session_state["evaluacion_json"] == "":
+            if st.session_state["post_content"] and st.session_state["evaluacion_json"] == "":
             #if st.session_state["post_content"] and st.session_state["evaluacion"] == "":
                 st.subheader("Ponderación por criterio de la contribución")
                 st.session_state["evaluacion_json"] = evaluar_contribucion(st.session_state["post_content"])
