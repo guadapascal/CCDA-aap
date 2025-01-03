@@ -195,6 +195,9 @@ if "evaluacion" not in st.session_state:
 if "evaluacion_json" not in st.session_state:
     st.session_state["evaluacion_json"] = ""
 
+if "evaluacion_realizada" not in st.session_state:
+    st.session_state["evaluacion_realizada"] = False
+
 # ETAPA 1: Ingresar una contribución y realizar el scrapping
 st.title("Análisis crítico y colaborativo de discursos")
 st.subheader("1. Co-creación de la base de datos")
@@ -268,28 +271,40 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
             validation_data,
             validation_columns
         )
-
+        
         if is_correct == "Sí":
             st.success("El contenido ha sido validado correctamente.")
+            # Activar siguiente etapa 
+            st.session_state["evaluacion_realizada"] = True
+        else:
+            st.warning("El contenido no es válido, lo revisaremos manualmente.")
             
 # ETAPA 2: Aplicar la evaluación automática de la contribución
-if st.session_state["post_content"] and st.session_state["evaluacion_json"] == "":
-    st.subheader("Ponderación por criterio de la contribución")
-    st.session_state["evaluacion_json"] = evaluar_contribucion(st.session_state["post_content"])
-    st.json(st.session_state["evaluacion_json"])
+if st.session_state["evaluacion_realizada"] and st.session_state["post_content"]:
+    st.subheader("2. Análisis automático")
 
-#Actualizar el registro con los resultados de la evaluación automática
-    eval_data = [
-        str(st.session_state["evaluacion_json"].get("Lenguaje Inclusivo", "")),
-        str(st.session_state["evaluacion_json"].get("Diversidad", "")),
-        str(st.session_state["evaluacion_json"].get("Historia", "")),
-        str(st.session_state["evaluacion_json"].get("Estereotipos", ""))
-    ]
-    eval_columns = [5, 6, 7, 8]
-    update_sheet(st.session_state["id_contribucion"], eval_data, eval_columns)
-    st.success("Resultados de la evaluación automática guardados.")
-else:
-    st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
+    # Verificar si la evluación ya fue realizada
+    if not st.session_state["evaluacion_json"]:
+        st.write("Ponderación por criterio de la contribución")
+        st.session_state["evaluacion_json"] = evaluar_contribucion(st.session_state["post_content"])
+        st.json(st.session_state["evaluacion_json"])
+
+        #Actualizar el registro con los resultados de la evaluación automática
+        eval_data = [
+            str(st.session_state["evaluacion_json"].get("Lenguaje Inclusivo", "")),
+            str(st.session_state["evaluacion_json"].get("Diversidad", "")),
+            str(st.session_state["evaluacion_json"].get("Historia", "")),
+            str(st.session_state["evaluacion_json"].get("Estereotipos", ""))
+        ]
+        eval_columns = [5, 6, 7, 8]
+        update_sheet(st.session_state["id_contribucion"], eval_data, eval_columns)
+        st.success("Resultados de la evaluación automática guardados.")
+    else:
+        st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
+
+elif not st.session_state["evaluacion_realizada"]:
+    st.subheader("2. Análisis automático")
+    st.info("Por favor confirma la validación del contenido para realizar la evaluación automática.")
 
 # Inicializar `valores_corregidos` en session_state
 if st.session_state["evaluacion_json"] and "valores_corregidos" not in st.session_state:
