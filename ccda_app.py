@@ -159,14 +159,14 @@ def evaluar_contribucion(contribucion):
         )
         # Obtener la respuesta de GPT
         evaluacion = response.choices[0].message.content.strip()
-        st.write(evaluacion)  # Mostrar la respuesta completa para debugging
+        #st.write(evaluacion)  # Mostrar la respuesta completa para debugging
 
         # Convertir la respuesta de GPT a un diccionario JSON
         evaluacion_json = json.loads(evaluacion)
 
         # Validar que se hayan devuelto todos los criterios
         if all(key in evaluacion_json for key in ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]):
-            st.success("Evaluación automática completada con justificaciones.")
+            st.success("Evaluación automática completada.")
             return evaluacion_json
         else:
             st.error("La respuesta no incluye todos los criterios esperados.")
@@ -196,8 +196,8 @@ if "evaluacion_json" not in st.session_state:
     st.session_state["evaluacion_json"] = ""
 
 # ETAPA 1: Ingresar una contribución y realizar el scrapping
-st.title("Análisis de discursos: un enfoque crítico y colaborativo")
-st.header("ETAPA 1: Co-creación de la base de datos")
+st.title("Análisis crítico y colaborativo de discursos")
+st.subheader("1. Co-creación de la base de datos")
 
 url = st.text_input("Ingresa la URL del posteo de la red social que quieres analizar:")
 
@@ -244,7 +244,7 @@ if url and st.button("Procesar URL"):
 
 # Botón "Confirmar Validación"
 if st.session_state["page_title"] or st.session_state["post_content"]:
-    st.subheader("Resultado del Web Scraping")
+    #st.subheader("Resultado del Web Scraping")
     st.write(f"**Título de la Página:** {st.session_state['page_title']}")
     st.text_area("Contenido del Posteo:", st.session_state["post_content"], height=300)
 
@@ -273,7 +273,6 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
             st.success("El contenido ha sido validado correctamente.")
         
             # ETAPA 2: Aplicar la evaluación automática de la contribución
-            st.header("ETAPA 2: Análisis automático")
             if st.session_state["post_content"] and st.session_state["evaluacion"] == "":
                 st.subheader("Ponderación por criterio de la contribución")
                 st.session_state["evaluacion_json"] = evaluar_contribucion(st.session_state["post_content"])
@@ -293,7 +292,8 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
             else:
                 st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
 
-# ETAPA 3: Re-entrenando el algoritmo colectivamente.  
+
+
 # Inicializar `valores_corregidos` en session_state
 if st.session_state["evaluacion_json"] and "valores_corregidos" not in st.session_state:
     st.session_state["valores_corregidos"] = {
@@ -305,15 +305,18 @@ if st.session_state["evaluacion_json"] and "valores_corregidos" not in st.sessio
 
 # Mostrar resultados y ajustar manualmente
 if st.session_state["evaluacion_json"]:
+    
+    # ETAPA 2: Re-entrenando el algoritmo colectivamente.  
+    st.subheader("2. Análisis automático")
 
     # Mostrar los resultados originales con sus justificaciones
-    st.subheader("Resultados de la evaluación automática")
+    st.write("Valuación por criterio de la contribución")
     for criterio, datos in st.session_state["evaluacion_json"].items():
         st.write(f"**{criterio}:**")
         st.write(f"- **Puntuación:** {datos['Puntuación']}")
         st.write(f"- **Justificación:** {datos['Justificación']}")
 
-    # ETAPA 3: Ajustar los valores manualmente
+    # ETAPA 3: Re-entrenando el algoritmo colectivamente.  
     st.header("ETAPA 3: Re-entrenando el algoritmo colectivamente")
     st.subheader("Modifica las poderaciones según tu mirada")
     
