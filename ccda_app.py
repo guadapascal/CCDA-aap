@@ -196,8 +196,10 @@ if "evaluacion_json" not in st.session_state:
     st.session_state["evaluacion_json"] = ""
 
 # ETAPA 1: Ingresar una contribución y realizar el scrapping
-st.title("Validación de Contenidos de Redes Sociales")
-url = st.text_input("Ingresa la URL del posteo de la red social:")
+st.title("Análisis de discursos: un enfoque crítico y colaborativo")
+st.header("ETAPA 1: Co-creación de la base de datos")
+
+url = st.text_input("Ingresa la URL del posteo de la red social que quieres analizar:")
 
 # Botón "Procesar URL"
 if url and st.button("Procesar URL"):
@@ -271,8 +273,9 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
             st.success("El contenido ha sido validado correctamente.")
         
             # ETAPA 2: Aplicar la evaluación automática de la contribución
+            st.header("ETAPA 2: Análisis automático")
             if st.session_state["post_content"] and st.session_state["evaluacion"] == "":
-                st.subheader("Evaluación automática de la contribución")
+                st.subheader("Ponderación por criterio de la contribución")
                 st.session_state["evaluacion_json"] = evaluar_contribucion(st.session_state["post_content"])
                 st.json(st.session_state["evaluacion_json"])
 
@@ -290,6 +293,7 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
             else:
                 st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
 
+# ETAPA 3: Re-entrenando el algoritmo colectivamente.  
 # Inicializar `valores_corregidos` en session_state
 if st.session_state["evaluacion_json"] and "valores_corregidos" not in st.session_state:
     st.session_state["valores_corregidos"] = {
@@ -301,16 +305,17 @@ if st.session_state["evaluacion_json"] and "valores_corregidos" not in st.sessio
 
 # Mostrar resultados y ajustar manualmente
 if st.session_state["evaluacion_json"]:
-    st.subheader("Resultados de la evaluación automática")
 
     # Mostrar los resultados originales con sus justificaciones
+    st.subheader("Resultados de la evaluación automática")
     for criterio, datos in st.session_state["evaluacion_json"].items():
         st.write(f"**{criterio}:**")
         st.write(f"- **Puntuación:** {datos['Puntuación']}")
         st.write(f"- **Justificación:** {datos['Justificación']}")
 
     # ETAPA 3: Ajustar los valores manualmente
-    st.subheader("Entrenando el algoritmo colectivamente")
+    st.header("ETAPA 3: Re-entrenando el algoritmo colectivamente")
+    st.subheader("Modifica las poderaciones según tu mirada")
     
     # Inicializar los valores corregidos en `session_state` si no existen
     if "valores_corregidos" not in st.session_state:
