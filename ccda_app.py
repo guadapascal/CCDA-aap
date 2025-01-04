@@ -292,7 +292,7 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
             
 # ETAPA 2: Aplicar la evaluación automática de la contribución
 #if st.session_state["evaluacion_realizada"] and st.session_state["post_content"]:
-if st.session_state["post_correct"]:
+if st.session_state["post_correct"] and  st.session_state["evaluacion_realizada"] == False:
     st.subheader("2. Análisis automático")
     
     # Verificar si la evaluación ya fue realizada
@@ -310,8 +310,8 @@ if st.session_state["post_correct"]:
     ]
     eval_columns = [5, 6, 7, 8]
     update_sheet(st.session_state["id_contribucion"], eval_data, eval_columns)
-    st.subheader("2. Análisis automático")
     st.success("Resultados de la evaluación automática guardados.")
+    st.session_state["evaluacion_realizada"] = True
     #else:
         #st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
 
