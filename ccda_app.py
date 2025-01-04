@@ -15,6 +15,7 @@ import json
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import uuid
+from datetime import datetime
 
 # Configurar Google Sheets
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
@@ -49,7 +50,11 @@ def get_driver():
 
 # Función para generar un ID único
 def create_id():
-    return str(uuid.uuid4())  
+    return str(uuid.uuid4())
+
+# Función para generar un timestamp
+def create_timestamp():
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Formato: Año-Mes-Día Hora:Minuto:Segundo
 
 # Función para limpiar el texto
 def limpiar_texto(texto):
@@ -95,7 +100,7 @@ def update_sheet(id_contribucion, data, columnas):
                 valueInputOption="RAW",
                 body=body
             ).execute()
-            #st.success("El registro existente ha sido actualizado correctamente.")
+            #st.success("El registro se ha actualizado correctamente.")
             st.write(":white_check_mark: Base de datos actualizada.")
         else:
             # Crear un nuevo registro con las columnas especificadas
@@ -220,9 +225,11 @@ url = st.text_input("Ingresa la URL del posteo de la red social que quieres anal
 # Botón "Procesar URL"
 if url and st.button("Procesar URL"):
     try:
-        # Generar un ID único
+        # Generar un ID único y un timestamp 
         if "id_contribucion" not in st.session_state:
             st.session_state["id_contribucion"] = create_id()
+        if "timestamp" not in st.session_state:
+            st.session_state["timestamp"] = create_timestamp()
         
         # Validar datos
         if not isinstance(st.session_state["id_contribucion"], str):
@@ -231,9 +238,13 @@ if url and st.button("Procesar URL"):
             url = str(url)
 
         # Crear el registro inicial con ID y URL
-        initial_data = [st.session_state["id_contribucion"], url]
+        initial_data = [
+            st.session_state["timestamp"],
+            st.session_state["id_contribucion"], 
+            url
+        ]
         update_sheet(
-            st.session_state["id_contribucion"], initial_data, ["ID_contribucion", "URL"]
+            st.session_state["id_contribucion"], initial_data, ["A", "B", "C"]
         )
 
         # Realizar web scraping
@@ -271,6 +282,7 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
     # Convertir los datos a cadenas antes de actualizar Google Sheets
         # Actualizar el registro con los datos de validación
         validation_data = [
+            str(st.session_state["timestamp"]), #fecha y hora del ingreso
             str(st.session_state["id_contribucion"]),  # ID único
             str(url),  # URL
             str(st.session_state["page_title"]),  # Título
@@ -278,7 +290,7 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
             str(is_correct),  # Validación
         ]
         # Columnas para los datos
-        validation_columns = [0, 1, 2, 3, 4]  # Índices para A, B, C, D, E
+        validation_columns = [0, 1, 2, 3, 4, 5]  # Índices para A, B, C, D, E
         update_sheet(
             st.session_state["id_contribucion"],
             validation_data,
@@ -291,7 +303,7 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
         else:
             st.warning("Ups! Algo falló. Lo revisaremos manualmente.")
             
-# ETAPA 2: Aplicar la evaluación automática de la contribución
+# ETAPA 2: Evaluación automática de la contribución ingresada
 if st.session_state["post_correct"] == True and st.session_state["evaluacion_realizada"] == False:
     #st.subheader("2. Análisis automático")
     
@@ -306,7 +318,7 @@ if st.session_state["post_correct"] == True and st.session_state["evaluacion_rea
         str(st.session_state["evaluacion_json"].get("Historia", "")),
         str(st.session_state["evaluacion_json"].get("Estereotipos", ""))
     ]
-    eval_columns = [5, 6, 7, 8]
+    eval_columns = [6, 7, 8, 9]
     update_sheet(st.session_state["id_contribucion"], eval_data, eval_columns)
     #st.success("Resultados de la evaluación automática guardados.")
     st.session_state["evaluacion_realizada"] = True
@@ -358,7 +370,7 @@ if st.session_state["evaluacion_json"]:
                 str(st.session_state["valores_corregidos"].get("Historia", "")),
                 str(st.session_state["valores_corregidos"].get("Estereotipos", ""))
             ]
-            ajusted_columns = [9, 10, 11, 12]  # Columnas para los valores ajustados
+            ajusted_columns = [10, 11, 12, 13]  # Columnas para los valores ajustados
             st.success("Re-entrenamiento completado")
             update_sheet(st.session_state["id_contribucion"], ajusted_data, ajusted_columns)
         else:
