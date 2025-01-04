@@ -295,12 +295,18 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
 if st.session_state["post_correct"] and  st.session_state["evaluacion_realizada"] == False:
     st.subheader("2. Análisis automático")
     
-    # Verificar si la evaluación ya fue realizada
-    #if not st.session_state["evaluacion_json"]:
-    st.write("Ponderación por criterio de la contribución")
+    # Ejecutar la evaluación automática
+    st.write("Valuación por criterio de la contribución")
     st.session_state["evaluacion_json"] = evaluar_contribucion(st.session_state["post_content"])
-    st.json(st.session_state["evaluacion_json"])
-
+    #st.json(st.session_state["evaluacion_json"])
+    
+    # Mostrar los resultados originales con sus justificaciones
+    #st.write("Valuación por criterio de la contribución")
+    for criterio, datos in st.session_state["evaluacion_json"].items():
+        st.write(f"**{criterio}:**")
+        st.write(f"- **Puntuación:** {datos['Puntuación']}")
+        st.write(f"- **Justificación:** {datos['Justificación']}")
+    
     #Actualizar el registro con los resultados de la evaluación automática
     eval_data = [
         str(st.session_state["evaluacion_json"].get("Lenguaje Inclusivo", "")),
@@ -321,13 +327,6 @@ if st.session_state["post_correct"] and  st.session_state["evaluacion_realizada"
     # ETAPA 2: Análisis automático.  
     #st.subheader("2. Análisis automático")
 
-    # Mostrar los resultados originales con sus justificaciones
-    #st.write("Valuación por criterio de la contribución")
-    #for criterio, datos in st.session_state["evaluacion_json"].items():
-        #st.write(f"**{criterio}:**")
-        #st.write(f"- **Puntuación:** {datos['Puntuación']}")
-        #st.write(f"- **Justificación:** {datos['Justificación']}")
-
 
 # ETAPA 3: Re-entrenando el algoritmo colectivamente.
 if st.session_state["evaluacion_json"]:
@@ -343,7 +342,7 @@ if st.session_state["evaluacion_json"]:
     # Mostrar sliders para ajustar cada criterio
     for criterio, datos in st.session_state["evaluacion_json"].items():
         st.session_state["valores_corregidos"][criterio] = st.slider(
-            f"Ajustar {criterio}:", 
+            f"{criterio}:", 
             min_value=1, 
             max_value=4, 
             value=datos["Puntuación"],  # Usamos "Puntuación" del JSON
