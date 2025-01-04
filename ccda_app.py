@@ -261,7 +261,11 @@ if "evaluacion_ajustada" not in st.session_state:
 st.title("Análisis crítico y colaborativo de discursos")
 st.subheader("1. Co-creación de la base de datos")
 
-url = st.text_input("Ingresa la URL del posteo de la red social que quieres analizar:")
+# Definir URL
+if new_url in st.session_state and st.session_state["new_url"]:
+    url = st.session_state["new_url"]
+else
+    url = st.text_input("Ingresa la URL del posteo de la red social que quieres analizar:")
 
 # Botón "Procesar URL"
 if url and st.button("Procesar URL"):
@@ -425,31 +429,33 @@ if st.session_state["evaluacion_ajustada"] == True:
         new_timestamp = create_timestamp()
 
         # Obtener una URL aleatoria de la base de datos
-        new_url = str(obtener_url())
+        new_url = obtener_url()
 
-        # Reiniciar el flujo con los nuevos datos
-        st.session_state["id_contribucion"] = new_id_contribucion
-        st.session_state["timestamp"] = new_timestamp
-        st.session_state["page_title"] = ""
-        st.session_state["post_content"] = ""
-        st.session_state["evaluacion"] = ""
-        st.session_state["evaluacion_json"] = ""
-        st.session_state["valores_corregidos"] = {}
-        st.session_state["post_correct"] = False
-        st.session_state["evaluacion_realizada"] = False
-        st.session_state["evaluacion_ajustada"] = False
+        if new_url:
+            # Reiniciar el flujo con los nuevos datos
+            st.session_state["id_contribucion"] = new_id_contribucion
+            st.session_state["timestamp"] = new_timestamp
+            st.session_state["url"] = new_url
+            st.session_state["page_title"] = ""
+            st.session_state["post_content"] = ""
+            st.session_state["evaluacion"] = ""
+            st.session_state["evaluacion_json"] = ""
+            st.session_state["valores_corregidos"] = {}
+            st.session_state["post_correct"] = False
+            st.session_state["evaluacion_realizada"] = False
+            st.session_state["evaluacion_ajustada"] = False
 
-        # Registrar el nuevo ID y timestamp en la base de datos
-        initial_data = [
-            st.session_state["id_contribucion"], 
-            st.session_state["timestamp"],
-            new_url
-        ]
-        initial_columns = [0,1,2]
-        update_sheet(
-            st.session_state["id_contribucion"], initial_data, initial_columns
-        )
-        st.success("Se ha iniciado un nuevo análisis con una contribución aleatoria.")
+            # Registrar el nuevo ID y timestamp en la base de datos
+            initial_data = [
+                st.session_state["id_contribucion"], 
+                st.session_state["timestamp"],
+                new_url
+            ]
+            initial_columns = [0,1,2]
+            update_sheet(
+                st.session_state["id_contribucion"], initial_data, initial_columns
+            )
+            st.success("Se ha iniciado un nuevo análisis con una contribución aleatoria.")
         
     else:
         st.write("Gracias por colaborar en el análisis.")
