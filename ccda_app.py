@@ -27,7 +27,7 @@ SPREADSHEET_ID = '1NtXDHphN_SC6fmAb2Ni6tYJGb7CiRgGuYqMJbclwAr0'
 # Configurar OpenAI
 try:
     openai.api_key = st.secrets["openai_api_key"]
-    st.write("Clave configurada correctamente.")
+    #st.write("Clave configurada correctamente.") # Mostrar la respuesta completa para debugging
 except Exception as e:
     st.error(f"Error al configurar la clave: {e}")
 
@@ -285,20 +285,17 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
         
         if is_correct == "Sí":
             st.success("El contenido ha sido validado correctamente.")
-            # Activar siguiente etapa 
             st.session_state["post_correct"] = True
         else:
             st.warning("El contenido no es válido, lo revisaremos manualmente.")
             
 # ETAPA 2: Aplicar la evaluación automática de la contribución
-#if st.session_state["evaluacion_realizada"] and st.session_state["post_content"]:
 if st.session_state["post_correct"] and st.session_state["evaluacion_realizada"] == False:
     st.subheader("2. Análisis automático")
     
     # Ejecutar la evaluación automática
     st.write("Aguarde unos segundos...")
     st.session_state["evaluacion_json"] = evaluar_contribucion(st.session_state["post_content"])
-    #st.json(st.session_state["evaluacion_json"])
     
     #Actualizar el registro con los resultados de la evaluación automática
     eval_data = [
@@ -311,11 +308,10 @@ if st.session_state["post_correct"] and st.session_state["evaluacion_realizada"]
     update_sheet(st.session_state["id_contribucion"], eval_data, eval_columns)
     st.success("Resultados de la evaluación automática guardados.")
     st.session_state["evaluacion_realizada"] = True
-    #else:
-        #st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
 
 # Mostrar los resultados originales con sus justificaciones
 if st.session_state["evaluacion_realizada"] == True:
+    st.subheader("2. Análisis automático")
     st.write("Valuación por criterio de la contribución")
     for criterio, datos in st.session_state["evaluacion_json"].items():
         st.write(f"**{criterio}:**")
