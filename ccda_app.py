@@ -293,27 +293,27 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
 # ETAPA 2: Aplicar la evaluación automática de la contribución
 #if st.session_state["evaluacion_realizada"] and st.session_state["post_content"]:
 if st.session_state["post_correct"]:
-    #st.subheader("2. Análisis automático")
+    st.subheader("2. Análisis automático")
     
     # Verificar si la evaluación ya fue realizada
-    if not st.session_state["evaluacion_json"]:
-        #st.write("Ponderación por criterio de la contribución")
-        st.session_state["evaluacion_json"] = evaluar_contribucion(st.session_state["post_content"])
-        st.json(st.session_state["evaluacion_json"])
+    #if not st.session_state["evaluacion_json"]:
+    st.write("Ponderación por criterio de la contribución")
+    st.session_state["evaluacion_json"] = evaluar_contribucion(st.session_state["post_content"])
+    st.json(st.session_state["evaluacion_json"])
 
-        #Actualizar el registro con los resultados de la evaluación automática
-        eval_data = [
-            str(st.session_state["evaluacion_json"].get("Lenguaje Inclusivo", "")),
-            str(st.session_state["evaluacion_json"].get("Diversidad", "")),
-            str(st.session_state["evaluacion_json"].get("Historia", "")),
-            str(st.session_state["evaluacion_json"].get("Estereotipos", ""))
-        ]
-        eval_columns = [5, 6, 7, 8]
-        update_sheet(st.session_state["id_contribucion"], eval_data, eval_columns)
-        st.subheader("2. Análisis automático")
-        st.success("Resultados de la evaluación automática guardados.")
-    else:
-        st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
+    #Actualizar el registro con los resultados de la evaluación automática
+    eval_data = [
+        str(st.session_state["evaluacion_json"].get("Lenguaje Inclusivo", "")),
+        str(st.session_state["evaluacion_json"].get("Diversidad", "")),
+        str(st.session_state["evaluacion_json"].get("Historia", "")),
+        str(st.session_state["evaluacion_json"].get("Estereotipos", ""))
+    ]
+    eval_columns = [5, 6, 7, 8]
+    update_sheet(st.session_state["id_contribucion"], eval_data, eval_columns)
+    st.subheader("2. Análisis automático")
+    st.success("Resultados de la evaluación automática guardados.")
+    #else:
+        #st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
 
 # Mostrar resultados y ajustar manualmente
 #if st.session_state["post_correct"]:
@@ -322,12 +322,11 @@ if st.session_state["post_correct"]:
     #st.subheader("2. Análisis automático")
 
     # Mostrar los resultados originales con sus justificaciones
-    st.write("Valuación por criterio de la contribución")
-    for criterio, datos in st.session_state["evaluacion_json"].items():
-        st.write(f"**{criterio}:**")
-        st.write(f"- **Puntuación:** {datos['Puntuación']}")
-        st.write(f"- **Justificación:** {datos['Justificación']}")
-
+    #st.write("Valuación por criterio de la contribución")
+    #for criterio, datos in st.session_state["evaluacion_json"].items():
+        #st.write(f"**{criterio}:**")
+        #st.write(f"- **Puntuación:** {datos['Puntuación']}")
+        #st.write(f"- **Justificación:** {datos['Justificación']}")
 
 
 # ETAPA 3: Re-entrenando el algoritmo colectivamente.
