@@ -315,11 +315,12 @@ if st.session_state["post_correct"] and st.session_state["evaluacion_realizada"]
         #st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
 
 # Mostrar los resultados originales con sus justificaciones
-st.write("Valuación por criterio de la contribución")
-for criterio, datos in st.session_state["evaluacion_json"].items():
-    st.write(f"**{criterio}:**")
-    st.write(f"- **Puntuación:** {datos['Puntuación']}")
-    st.write(f"- **Justificación:** {datos['Justificación']}")
+if st.session_state["evaluacion_realizada"] == True:
+    st.write("Valuación por criterio de la contribución")
+    for criterio, datos in st.session_state["evaluacion_json"].items():
+        st.write(f"**{criterio}:**")
+        st.write(f"- **Puntuación:** {datos['Puntuación']}")
+        st.write(f"- **Justificación:** {datos['Justificación']}")
 
 # Mostrar resultados y ajustar manualmente
 #if st.session_state["post_correct"]:
