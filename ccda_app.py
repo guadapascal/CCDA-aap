@@ -265,7 +265,7 @@ st.title("Análisis crítico y colaborativo de discursos")
 st.subheader("1. Co-creación de la base de datos")
 
 # Definir URL
-if new_url in st.session_state and st.session_state["new_url"]:
+if st.session_state["new_url"]:
     url = st.session_state["new_url"]
 else:
     url = st.text_input("Ingresa la URL del posteo de la red social que quieres analizar:")
@@ -438,7 +438,7 @@ if st.session_state["evaluacion_ajustada"] == True:
             # Reiniciar el flujo con los nuevos datos
             st.session_state["id_contribucion"] = new_id_contribucion
             st.session_state["timestamp"] = new_timestamp
-            st.session_state["url"] = new_url
+            st.session_state["new_url"] = new_url
             st.session_state["page_title"] = ""
             st.session_state["post_content"] = ""
             st.session_state["evaluacion"] = ""
@@ -459,7 +459,11 @@ if st.session_state["evaluacion_ajustada"] == True:
                 st.session_state["id_contribucion"], initial_data, initial_columns
             )
             st.success("Se ha iniciado un nuevo análisis con una contribución aleatoria.")
-        
+
+            # Reiniciar el flujo de la app
+            st.experimental_rerun()
+        else:
+            st.error("No se pudo obtener una URL aleatoria. Por favor, intenta más tarde.")
     else:
         st.write("Gracias por colaborar en el análisis.")
     
