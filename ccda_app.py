@@ -205,7 +205,7 @@ def obtener_url():
 
         # Filtrar filas para excluir URLs ya procesadas
         filas_disponibles = [
-            fila for fila in values[1:] if fila[2] not in st.session_state["urls_procesadas"]
+            fila for fila in values[1:] if len(fila) > 2 and fila[2] not in st.session_state["urls_procesadas"]
         ]
 
         if not filas_disponibles:
