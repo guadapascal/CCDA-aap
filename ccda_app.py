@@ -264,7 +264,7 @@ st.subheader("1. Co-creación de la base de datos")
 # Definir URL
 if new_url in st.session_state and st.session_state["new_url"]:
     url = st.session_state["new_url"]
-else
+else:
     url = st.text_input("Ingresa la URL del posteo de la red social que quieres analizar:")
 
 # Botón "Procesar URL"
