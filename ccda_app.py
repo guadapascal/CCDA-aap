@@ -426,33 +426,31 @@ if st.session_state["evaluacion_ajustada"] == True:
 
         # Obtener una URL aleatoria de la base de datos
         new_url = obtener_url()
-    
-        if new_url:
-            # Reiniciar el flujo con los nuevos datos
-            st.session_state["id_contribucion"] = new_id_contribucion
-            st.session_state["timestamp"] = new_timestamp
-            st.session_state["page_title"] = ""
-            st.session_state["post_content"] = ""
-            st.session_state["evaluacion"] = ""
-            st.session_state["evaluacion_json"] = ""
-            st.session_state["valores_corregidos"] = {}
-            st.session_state["post_correct"] = False
-            st.session_state["evaluacion_realizada"] = False
-            st.session_state["evaluacion_ajustada"] = False
 
-            # Registrar el nuevo ID y timestamp en la base de datos
-            initial_data = [
-                st.session_state["id_contribucion"], 
-                st.session_state["timestamp"],
-                new_url
-            ]
-            initial_columns = [0,1,2]
-            update_sheet(
-                st.session_state["id_contribucion"], initial_data, initial_columns
-            )
-            st.success("Se ha iniciado un nuevo análisis con una contribución aleatoria.")
-        else:
-            st.error("No se pudo iniciar un nuevo análisis porque no hay suficientes datos en la base de datos.")
+        # Reiniciar el flujo con los nuevos datos
+        st.session_state["id_contribucion"] = new_id_contribucion
+        st.session_state["timestamp"] = new_timestamp
+        st.session_state["page_title"] = ""
+        st.session_state["post_content"] = ""
+        st.session_state["evaluacion"] = ""
+        st.session_state["evaluacion_json"] = ""
+        st.session_state["valores_corregidos"] = {}
+        st.session_state["post_correct"] = False
+        st.session_state["evaluacion_realizada"] = False
+        st.session_state["evaluacion_ajustada"] = False
+
+        # Registrar el nuevo ID y timestamp en la base de datos
+        initial_data = [
+            st.session_state["id_contribucion"], 
+            st.session_state["timestamp"],
+            new_url
+        ]
+        initial_columns = [0,1,2]
+        update_sheet(
+            st.session_state["id_contribucion"], initial_data, initial_columns
+        )
+        st.success("Se ha iniciado un nuevo análisis con una contribución aleatoria.")
+        
     else:
         st.write("Gracias por colaborar en el análisis.")
     
