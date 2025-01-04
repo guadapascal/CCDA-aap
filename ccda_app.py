@@ -425,7 +425,7 @@ if st.session_state["evaluacion_ajustada"] == True:
         new_timestamp = create_timestamp()
 
         # Obtener una URL aleatoria de la base de datos
-        new_url = obtener_url()
+        new_url = str(obtener_url())
 
         # Reiniciar el flujo con los nuevos datos
         st.session_state["id_contribucion"] = new_id_contribucion
@@ -443,7 +443,7 @@ if st.session_state["evaluacion_ajustada"] == True:
         initial_data = [
             st.session_state["id_contribucion"], 
             st.session_state["timestamp"],
-            url = str(new_url)
+            new_url
         ]
         initial_columns = [0,1,2]
         update_sheet(
