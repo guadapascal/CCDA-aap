@@ -167,17 +167,17 @@ def evaluar_contribucion(contribucion):
         # Validar que se hayan devuelto todos los criterios
         if all(key in evaluacion_json for key in ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]):
             st.success("Evaluación automática completada.")
-            #return evaluacion_json
+            return evaluacion_json
         else:
             st.error("La respuesta no incluye todos los criterios esperados.")
-            #return {}
+            return {}
 
     except json.JSONDecodeError as e:
         st.error(f"Error al interpretar la respuesta del modelo como JSON: {e}")
-        #return {}
+        return {}
     except Exception as e:
         st.error(f"Error al interactuar con la API de OpenAI: {e}")
-        #return {}
+        return {}
 
 
 # FLUJO DE LA APP
