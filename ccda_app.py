@@ -167,17 +167,17 @@ def evaluar_contribucion(contribucion):
         # Validar que se hayan devuelto todos los criterios
         if all(key in evaluacion_json for key in ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]):
             st.success("Evaluación automática completada.")
-            return evaluacion_json
+            #return evaluacion_json
         else:
             st.error("La respuesta no incluye todos los criterios esperados.")
-            return {}
+            #return {}
 
     except json.JSONDecodeError as e:
         st.error(f"Error al interpretar la respuesta del modelo como JSON: {e}")
-        return {}
+        #return {}
     except Exception as e:
         st.error(f"Error al interactuar con la API de OpenAI: {e}")
-        return {}
+        #return {}
 
 
 # FLUJO DE LA APP
@@ -293,9 +293,9 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
 # ETAPA 2: Aplicar la evaluación automática de la contribución
 #if st.session_state["evaluacion_realizada"] and st.session_state["post_content"]:
 if st.session_state["post_correct"]:
-    st.subheader("2. Análisis automático")
+    #st.subheader("2. Análisis automático")
     
-    # Verificar si la evluación ya fue realizada
+    # Verificar si la evaluación ya fue realizada
     if not st.session_state["evaluacion_json"]:
         #st.write("Ponderación por criterio de la contribución")
         st.session_state["evaluacion_json"] = evaluar_contribucion(st.session_state["post_content"])
