@@ -414,7 +414,7 @@ if st.session_state["evaluacion_json"]:
 
 
 # ETAPA 4: Preguntar al usuario si desea realizar el ajuste manual en otra contribución
-if st.session_state["evaluacion_ajustada"] == True
+if st.session_state["evaluacion_ajustada"] == True:
     st.subheader("Bonus track")
     st.write("¿Desea realizar el reentramiento en una contribución aportada por otra persona?")
     continuar = st.radio("Selecciona una opción:", ("No", "Sí"))
