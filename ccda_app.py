@@ -16,6 +16,7 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import uuid
 from datetime import datetime
+import random
 
 # Configurar Google Sheets
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
@@ -186,10 +187,43 @@ def evaluar_contribucion(contribucion):
         st.error(f"Error al interactuar con la API de OpenAI: {e}")
         return {}
 
+# Función para obtener una URL ya almacenada en la base de datos
+def obtener_url():
+    try:
+        # Leer todas las filas existentes en la hoja
+        sheet = sheet_service.spreadsheets()
+        result = sheet.values().get(
+            spreadsheetId=SPREADSHEET_ID,
+            range="Hoja1"
+        ).execute()
+        values = result.get("values", [])
+
+        # Verificar si hay datos suficientes en la base de datos
+        if len(values) <= 1:
+            st.warning("Por ahora no hay suficientes registros en la base de datos para seleccionar una URL.")
+            return None
+
+        # Filtrar filas para excluir URLs ya procesadas
+        filas_disponibles = [
+            fila for fila in values[1:] if fila[2] not in st.session_state["urls_procesadas"]
+        ]
+
+        if not filas_disponibles:
+            st.warning("Todas las URLs disponibles ya han sido procesadas en esta sesión.")
+            return None
+
+        # Seleccionar una fila aleatoria
+        fila_aleatoria = random.choice(filas_disponibles)
+        url_aleatoria = fila_aleatoria[2]  # Asumimos que la URL está en la tercera columna
+        return url_aleatoria
+    except Exception as e:
+        st.error(f"Error al obtener una URL aleatoria: {e}")
+        return None
+
 
 # FLUJO DE LA APP
 
-# Verificacion si `session_state` tiene las claves necesarias e inicializar variables.
+# Inicialización de variables
 if "page_title" not in st.session_state:
     st.session_state["page_title"] = ""
 
@@ -215,6 +249,13 @@ if st.session_state["evaluacion_json"] and "valores_corregidos" not in st.sessio
         "Historia": st.session_state["evaluacion_json"].get("Historia", 1),
         "Estereotipos": st.session_state["evaluacion_json"].get("Estereotipos", 1),
     }
+
+if "urls_procesadas" not in st.session_state:
+    st.session_state["urls_procesadas"] = []
+
+if "evaluacion_ajustada" not in st.session_state:
+    st.session_state["evaluacion_ajustada"] = False
+    
 
 # ETAPA 1: Ingresar una contribución y realizar el scrapping
 st.title("Análisis crítico y colaborativo de discursos")
@@ -333,13 +374,6 @@ if st.session_state["evaluacion_realizada"] == True:
         st.write(f"- **Puntuación:** {datos['Puntuación']}")
         st.write(f"- **Justificación:** {datos['Justificación']}")
 
-# Mostrar resultados y ajustar manualmente
-#if st.session_state["post_correct"]:
-    
-    # ETAPA 2: Análisis automático.  
-    #st.subheader("2. Análisis automático")
-
-
 # ETAPA 3: Re-entrenando el algoritmo colectivamente.
 if st.session_state["evaluacion_json"]:
     st.subheader("3. Re-entrenando el algoritmo colectivamente")
@@ -374,10 +408,53 @@ if st.session_state["evaluacion_json"]:
             ajusted_columns = [10, 11, 12, 13]  # Columnas para los valores ajustados
             st.success("Re-entrenamiento completado")
             update_sheet(st.session_state["id_contribucion"], ajusted_data, ajusted_columns)
+            st.session_state["evaluacion_ajustada"] = True
         else:
             st.error("Ups! Algo falló. Lo revisaremos manualmente.v2")
-        
 
-        
-        
+
+# ETAPA 4: Preguntar al usuario si desea realizar el ajuste manual en otra contribución
+if st.session_state["evaluacion_ajustada"] == True
+    st.subheader("Bonus track")
+    st.write("¿Desea realizar el reentramiento en una contribución aportada por otra persona?")
+    continuar = st.radio("Selecciona una opción:", ("No", "Sí"))
+
+    if continuar == "Sí":
+        # Generar un nuevo ID_contribución y timestamp
+        new_id_contribucion = create_id()
+        new_timestamp = create_timestamp()
+
+        # Obtener una URL aleatoria de la base de datos
+        new_url = obtener_url()
+    
+        if new_url:
+            # Reiniciar el flujo con los nuevos datos
+            st.session_state["id_contribucion"] = new_id_contribucion
+            st.session_state["timestamp"] = new_timestamp
+            st.session_state["page_title"] = ""
+            st.session_state["post_content"] = ""
+            st.session_state["evaluacion"] = ""
+            st.session_state["evaluacion_json"] = ""
+            st.session_state["valores_corregidos"] = {}
+            st.session_state["post_correct"] = False
+            st.session_state["evaluacion_realizada"] = False
+            st.session_state["evaluacion_ajustada"] = False
+
+            # Registrar el nuevo ID y timestamp en la base de datos
+            initial_data = [
+                st.session_state["id_contribucion"], 
+                st.session_state["timestamp"],
+                new_url
+            ]
+            initial_columns = [0,1,2]
+            update_sheet(
+                st.session_state["id_contribucion"], initial_data, initial_columns
+            )
+            st.success("Se ha iniciado un nuevo análisis con una contribución aleatoria.")
+        else:
+            st.error("No se pudo iniciar un nuevo análisis porque no hay suficientes datos en la base de datos.")
+    else:
+        st.write("Gracias por colaborar en el análisis.")
+    
+
 
