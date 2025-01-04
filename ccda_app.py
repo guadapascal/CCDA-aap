@@ -430,7 +430,6 @@ if st.session_state["evaluacion_ajustada"] == True:
         # Reiniciar el flujo con los nuevos datos
         st.session_state["id_contribucion"] = new_id_contribucion
         st.session_state["timestamp"] = new_timestamp
-        st.session_strate["url"] = new_url
         st.session_state["page_title"] = ""
         st.session_state["post_content"] = ""
         st.session_state["evaluacion"] = ""
@@ -444,7 +443,7 @@ if st.session_state["evaluacion_ajustada"] == True:
         initial_data = [
             st.session_state["id_contribucion"], 
             st.session_state["timestamp"],
-            st.session_strate["url"] = new_url
+            url = str(new_url)
         ]
         initial_columns = [0,1,2]
         update_sheet(
