@@ -250,6 +250,9 @@ if st.session_state["evaluacion_json"] and "valores_corregidos" not in st.sessio
         "Estereotipos": st.session_state["evaluacion_json"].get("Estereotipos", 1),
     }
 
+if "new_url" not in st.session_state:
+    st.session_state["new_url"] = ""
+    
 if "urls_procesadas" not in st.session_state:
     st.session_state["urls_procesadas"] = []
 
