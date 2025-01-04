@@ -292,20 +292,13 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
             
 # ETAPA 2: Aplicar la evaluación automática de la contribución
 #if st.session_state["evaluacion_realizada"] and st.session_state["post_content"]:
-if st.session_state["post_correct"] and  st.session_state["evaluacion_realizada"] == False:
+if st.session_state["post_correct"] and st.session_state["evaluacion_realizada"] == False:
     st.subheader("2. Análisis automático")
     
     # Ejecutar la evaluación automática
-    st.write("Valuación por criterio de la contribución")
+    st.write("Aguarde unos segundos...")
     st.session_state["evaluacion_json"] = evaluar_contribucion(st.session_state["post_content"])
     #st.json(st.session_state["evaluacion_json"])
-    
-    # Mostrar los resultados originales con sus justificaciones
-    #st.write("Valuación por criterio de la contribución")
-    for criterio, datos in st.session_state["evaluacion_json"].items():
-        st.write(f"**{criterio}:**")
-        st.write(f"- **Puntuación:** {datos['Puntuación']}")
-        st.write(f"- **Justificación:** {datos['Justificación']}")
     
     #Actualizar el registro con los resultados de la evaluación automática
     eval_data = [
@@ -320,6 +313,13 @@ if st.session_state["post_correct"] and  st.session_state["evaluacion_realizada"
     st.session_state["evaluacion_realizada"] = True
     #else:
         #st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
+
+# Mostrar los resultados originales con sus justificaciones
+st.write("Valuación por criterio de la contribución")
+for criterio, datos in st.session_state["evaluacion_json"].items():
+    st.write(f"**{criterio}:**")
+    st.write(f"- **Puntuación:** {datos['Puntuación']}")
+    st.write(f"- **Justificación:** {datos['Justificación']}")
 
 # Mostrar resultados y ajustar manualmente
 #if st.session_state["post_correct"]:
