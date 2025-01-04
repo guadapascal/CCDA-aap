@@ -460,8 +460,6 @@ if st.session_state["evaluacion_ajustada"] == True:
             )
             st.success("Se ha iniciado un nuevo análisis con una contribución aleatoria.")
 
-            # Reiniciar el flujo de la app
-            st.experimental_rerun()
         else:
             st.error("No se pudo obtener una URL aleatoria. Por favor, intenta más tarde.")
     else:
