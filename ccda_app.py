@@ -106,9 +106,10 @@ def update_sheet(id_contribucion, data, columnas):
                 insertDataOption="INSERT_ROWS",
                 body=body
             ).execute()
-            st.success("El registro ha sido agregado correctamente.")
+            #st.success("El registro ha sido agregado correctamente.")
+            st.write(":white_check_mark: Base de datos actualizada.")
     except Exception as e:
-        st.error(f"Ups! Algo falló. No se pudo actualizar la base de datos: {e}")
+        st.error(f" :x: Ups! Algo falló. No se pudo actualizar la base de datos: {e}")
         print(e)
 
 # Función para evaluar una contribución
@@ -166,7 +167,7 @@ def evaluar_contribucion(contribucion):
 
         # Validar que se hayan devuelto todos los criterios
         if all(key in evaluacion_json for key in ["Lenguaje Inclusivo", "Diversidad", "Historia", "Estereotipos"]):
-            st.success("Evaluación automática completada.")
+            st.success("Evaluación completada.")
             return evaluacion_json
         else:
             st.error("La respuesta no incluye todos los criterios esperados.")
@@ -249,9 +250,9 @@ if url and st.button("Procesar URL"):
             ).text
         except Exception:
             st.session_state["post_content"] = "No se pudo extraer el contenido del posteo."
-        st.success("Web scraping completado.")
+        st.success("Extracción completada.")
     except Exception as e:
-        st.error(f"Hubo un error al intentar hacer web scraping: {e}")
+        st.error(f"Hubo un error al intentar hacer el proceso de web scraping: {e}")
     finally:
         if "driver" in locals():
             driver.quit()
@@ -284,14 +285,14 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
         )
         
         if is_correct == "Sí":
-            st.success("El contenido ha sido validado correctamente.")
+            st.success("Validación completada.")
             st.session_state["post_correct"] = True
         else:
-            st.warning("El contenido no es válido, lo revisaremos manualmente.")
+            st.warning("Ups! Algo falló. Lo revisaremos manualmente.")
             
 # ETAPA 2: Aplicar la evaluación automática de la contribución
-if st.session_state["post_correct"] and st.session_state["evaluacion_realizada"] == False:
-    st.subheader("2. Análisis automático")
+if st.session_state["post_correct"] == True and st.session_state["evaluacion_realizada"] == False:
+    #st.subheader("2. Análisis automático")
     
     # Ejecutar la evaluación automática
     st.write("Aguarde unos segundos...")
@@ -306,7 +307,7 @@ if st.session_state["post_correct"] and st.session_state["evaluacion_realizada"]
     ]
     eval_columns = [5, 6, 7, 8]
     update_sheet(st.session_state["id_contribucion"], eval_data, eval_columns)
-    st.success("Resultados de la evaluación automática guardados.")
+    #st.success("Resultados de la evaluación automática guardados.")
     st.session_state["evaluacion_realizada"] = True
 
 # Mostrar los resultados originales con sus justificaciones
@@ -357,10 +358,10 @@ if st.session_state["evaluacion_json"]:
                 str(st.session_state["valores_corregidos"].get("Estereotipos", ""))
             ]
             ajusted_columns = [9, 10, 11, 12]  # Columnas para los valores ajustados
+            st.success("Re-entrenamiento completado")
             update_sheet(st.session_state["id_contribucion"], ajusted_data, ajusted_columns)
-            st.success("Resultados ajustados guardados correctamente.")
         else:
-            st.error("No se pudieron guardar los valores ajustados porque no están inicializados.")
+            st.error("Ups! Algo falló. Lo revisaremos manualmente.v2")
         
 
         
