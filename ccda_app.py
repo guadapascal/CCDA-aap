@@ -95,7 +95,8 @@ def update_sheet(id_contribucion, data, columnas):
                 valueInputOption="RAW",
                 body=body
             ).execute()
-            st.success("El registro existente ha sido actualizado correctamente.")
+            #st.success("El registro existente ha sido actualizado correctamente.")
+            st.write(":white_check_mark: Base de datos actualizada.")
         else:
             # Crear un nuevo registro con las columnas especificadas
             body = {"values": [data]}
