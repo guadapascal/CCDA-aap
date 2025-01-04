@@ -182,7 +182,7 @@ def evaluar_contribucion(contribucion):
 
 # FLUJO DE LA APP
 
-# Verificacion si `session_state` tiene las claves necesarias)
+# Verificacion si `session_state` tiene las claves necesarias e inicializar variables.
 if "page_title" not in st.session_state:
     st.session_state["page_title"] = ""
 
@@ -195,8 +195,19 @@ if "evaluacion" not in st.session_state:
 if "evaluacion_json" not in st.session_state:
     st.session_state["evaluacion_json"] = ""
 
+if "post_correct" not in st.session_state:
+    st.session_state["post_correct"] = False
+    
 if "evaluacion_realizada" not in st.session_state:
     st.session_state["evaluacion_realizada"] = False
+
+if st.session_state["evaluacion_json"] and "valores_corregidos" not in st.session_state:
+    st.session_state["valores_corregidos"] = {
+        "Lenguaje Inclusivo": st.session_state["evaluacion_json"].get("Lenguaje Inclusivo", 1),
+        "Diversidad": st.session_state["evaluacion_json"].get("Diversidad", 1),
+        "Historia": st.session_state["evaluacion_json"].get("Historia", 1),
+        "Estereotipos": st.session_state["evaluacion_json"].get("Estereotipos", 1),
+    }
 
 # ETAPA 1: Ingresar una contribución y realizar el scrapping
 st.title("Análisis crítico y colaborativo de discursos")
@@ -275,16 +286,18 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
         if is_correct == "Sí":
             st.success("El contenido ha sido validado correctamente.")
             # Activar siguiente etapa 
-            st.session_state["evaluacion_realizada"] = True
+            st.session_state["post_correct"] = True
         else:
             st.warning("El contenido no es válido, lo revisaremos manualmente.")
             
 # ETAPA 2: Aplicar la evaluación automática de la contribución
-if st.session_state["evaluacion_realizada"] and st.session_state["post_content"]:
-
+#if st.session_state["evaluacion_realizada"] and st.session_state["post_content"]:
+if st.session_state["post_correct"]:
+    st.subheader("2. Análisis automático")
+    
     # Verificar si la evluación ya fue realizada
     if not st.session_state["evaluacion_json"]:
-        st.write("Ponderación por criterio de la contribución")
+        #st.write("Ponderación por criterio de la contribución")
         st.session_state["evaluacion_json"] = evaluar_contribucion(st.session_state["post_content"])
         st.json(st.session_state["evaluacion_json"])
 
@@ -302,24 +315,11 @@ if st.session_state["evaluacion_realizada"] and st.session_state["post_content"]
     else:
         st.warning("No se puede realizar la evaluación automática en esta contribución. Lo revisaremos manualmente.")
 
-#elif not st.session_state["evaluacion_realizada"]:
-#    st.subheader("2. Análisis automático")
-#    st.info("Por favor confirma la validación del contenido para realizar la evaluación automática.")
-
-# Inicializar `valores_corregidos` en session_state
-if st.session_state["evaluacion_json"] and "valores_corregidos" not in st.session_state:
-    st.session_state["valores_corregidos"] = {
-        "Lenguaje Inclusivo": st.session_state["evaluacion_json"].get("Lenguaje Inclusivo", 1),
-        "Diversidad": st.session_state["evaluacion_json"].get("Diversidad", 1),
-        "Historia": st.session_state["evaluacion_json"].get("Historia", 1),
-        "Estereotipos": st.session_state["evaluacion_json"].get("Estereotipos", 1),
-    }
-
 # Mostrar resultados y ajustar manualmente
-if st.session_state["evaluacion_json"]:
+#if st.session_state["post_correct"]:
     
     # ETAPA 2: Análisis automático.  
-    st.subheader("2. Análisis automático")
+    #st.subheader("2. Análisis automático")
 
     # Mostrar los resultados originales con sus justificaciones
     st.write("Valuación por criterio de la contribución")
@@ -328,7 +328,10 @@ if st.session_state["evaluacion_json"]:
         st.write(f"- **Puntuación:** {datos['Puntuación']}")
         st.write(f"- **Justificación:** {datos['Justificación']}")
 
-    # ETAPA 3: Re-entrenando el algoritmo colectivamente.  
+
+
+# ETAPA 3: Re-entrenando el algoritmo colectivamente.
+if st.session_state["evaluacion_json"]:
     st.subheader("3. Re-entrenando el algoritmo colectivamente")
     st.write("Modifica las poderaciones según tu mirada")
     
