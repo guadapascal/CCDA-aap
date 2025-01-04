@@ -239,12 +239,13 @@ if url and st.button("Procesar URL"):
 
         # Crear el registro inicial con ID y URL
         initial_data = [
-            st.session_state["timestamp"],
             st.session_state["id_contribucion"], 
+            st.session_state["timestamp"],
             url
         ]
+        initial_columns = [0, 1, 2]
         update_sheet(
-            st.session_state["id_contribucion"], initial_data, ["A", "B", "C"]
+            st.session_state["id_contribucion"], initial_data, initial_columns
         )
 
         # Realizar web scraping
@@ -282,15 +283,15 @@ if st.session_state["page_title"] or st.session_state["post_content"]:
     # Convertir los datos a cadenas antes de actualizar Google Sheets
         # Actualizar el registro con los datos de validación
         validation_data = [
-            str(st.session_state["timestamp"]), #fecha y hora del ingreso
-            str(st.session_state["id_contribucion"]),  # ID único
-            str(url),  # URL
+            #str(st.session_state["id_contribucion"]),  # ID único
+            #str(st.session_state["timestamp"]), #fecha y hora del ingreso
+            #str(url),  # URL
             str(st.session_state["page_title"]),  # Título
             str(st.session_state["post_content"]),  # Contenido
             str(is_correct),  # Validación
         ]
         # Columnas para los datos
-        validation_columns = [0, 1, 2, 3, 4, 5]  # Índices para A, B, C, D, E
+        validation_columns = [3, 4, 5]  # Índices para A, B, C, D, E
         update_sheet(
             st.session_state["id_contribucion"],
             validation_data,
